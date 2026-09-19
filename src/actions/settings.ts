@@ -44,6 +44,19 @@ export async function addRepo(formData: FormData) {
   back("success", t(m.settings.repos.added, { repo: `${owner}/${name}` }));
 }
 
+/** Suit un dépôt choisi dans la liste du compte : ses commits arrivent à la prochaine synchronisation. */
+export async function trackRepo(fullName: string) {
+  const match = REPO_RE.exec(String(fullName ?? "").trim());
+  if (!match) return;
+  const [, owner, name] = match;
+  try {
+    await getStore().addRepo({ owner, name, tracked_since: null });
+  } catch (err) {
+    if (!(err instanceof DuplicateError)) throw err;
+  }
+  refresh();
+}
+
 /** Date à partir de laquelle l'activité du dépôt est synchronisée et comptée. */
 export async function setRepoTrackedSince(formData: FormData) {
   const id = z.uuid().parse(formData.get("id"));

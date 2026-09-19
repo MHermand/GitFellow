@@ -8,8 +8,10 @@ import {
   type AuthorItem,
   type ContributorItem,
 } from "./Contributors";
+import { GitHubAccount, type GitHubAccountItem } from "./GitHubAccount";
 import { LanguageField } from "./LanguageField";
-import { AddRepoForm, RepoListHeader, RepoRow, type RepoItem } from "./Repos";
+import { RepoListHeader, RepoRow, type RepoItem } from "./Repos";
+import { RepoPicker, type RepoChoice } from "./RepoPicker";
 import { RulesFields } from "./RulesFields";
 
 export interface RulesValues {
@@ -25,13 +27,16 @@ export interface SettingsViewProps {
   authors: AuthorItem[];
   rules: RulesValues;
   locale: "auto" | "fr" | "en";
+  account: GitHubAccountItem | null;
+  /** Dépôts du compte pas encore suivis. */
+  choices: RepoChoice[];
 }
 
 /**
  * Corps de la page Paramètres : trois cards, une ligne par dépôt et par personne.
  * Sans accès aux données, pour être rendu aussi par l'aperçu de scripts/preview-settings.tsx.
  */
-export async function SettingsView({ notice, repos, contributors, authors, rules, locale }: SettingsViewProps) {
+export async function SettingsView({ notice, repos, contributors, authors, rules, locale, account, choices }: SettingsViewProps) {
   const { m } = await getI18n();
   return (
     <>
@@ -51,7 +56,7 @@ export async function SettingsView({ notice, repos, contributors, authors, rules
               ))}
             </>
           )}
-          <AddRepoForm />
+          <RepoPicker choices={choices} />
         </div>
       </Card>
 
@@ -84,6 +89,12 @@ export async function SettingsView({ notice, repos, contributors, authors, rules
       <Card title={m.settings.language.title}>
         <LanguageField value={locale} />
       </Card>
+
+      <div id="github">
+        <Card title={m.settings.github.title}>
+          <GitHubAccount account={account} />
+        </Card>
+      </div>
     </>
   );
 }

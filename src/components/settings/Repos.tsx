@@ -1,9 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
-import { addRepo, deleteRepo, setRepoTrackedSince } from "@/actions/settings";
+import { deleteRepo, setRepoTrackedSince } from "@/actions/settings";
 import { runSyncOne } from "@/actions/sync";
-import { CalendarIcon, PlusIcon, RefreshIcon, TrashIcon } from "@/components/icons";
+import { CalendarIcon, RefreshIcon, TrashIcon } from "@/components/icons";
 import { inputBase } from "@/components/ui";
 import { useI18n } from "@/i18n/client";
 
@@ -21,8 +21,6 @@ export interface RepoItem {
 const NAME_COL = "w-60 shrink-0 truncate";
 const DATE_COL = "w-[150px] shrink-0";
 const ICON_COL = "w-9 shrink-0";
-/** Colonnes « synchroniser » + « début du suivi » réunies, pour le champ d'ajout. */
-const ADD_COL = "w-[198px] shrink-0";
 /** Déclencheur natif du calendrier rendu invisible et posé sur la zone de l'icône. */
 const PICKER =
   "[&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-y-0 [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:m-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-9 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0";
@@ -31,27 +29,6 @@ const iconButton =
   "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line bg-surface text-muted transition-colors hover:border-accent/40 hover:bg-accent-soft hover:text-accent-fg disabled:opacity-50";
 const iconDanger =
   "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line bg-surface text-muted transition-colors hover:border-danger/30 hover:bg-danger/10 hover:text-danger";
-
-/** Ajout d'un dépôt, sous la liste, sur les colonnes « synchroniser » et « début du suivi ». */
-export function AddRepoForm() {
-  const { m } = useI18n();
-  return (
-    <form action={addRepo} className="flex items-center gap-x-3 border-t border-line pt-3 max-sm:flex-wrap">
-      <span className={`${NAME_COL} max-sm:hidden`} />
-      <span className="flex-1 max-sm:hidden" />
-      <input
-        name="repo"
-        required
-        placeholder={m.settings.repos.addPlaceholder}
-        aria-label={m.settings.repos.add}
-        className={`${inputBase} h-9 px-3 placeholder:text-xs ${ADD_COL} max-sm:w-full`}
-      />
-      <button type="submit" aria-label={m.settings.repos.addTitle} title={m.settings.repos.addTitle} className={iconButton}>
-        <PlusIcon />
-      </button>
-    </form>
-  );
-}
 
 /** En-tête de colonne : la date que porte chaque ligne. */
 export function RepoListHeader() {

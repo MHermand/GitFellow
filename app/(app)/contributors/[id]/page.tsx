@@ -6,7 +6,7 @@ import { Meter } from "@/components/Meter";
 import { PageHue } from "@/components/PageHue";
 import { StatusIcon } from "@/components/StatusIcon";
 import { ArrowLeftIcon } from "@/components/icons";
-import { Card, PageHeader } from "@/components/ui";
+import { Card, Notice, PageHeader } from "@/components/ui";
 import { getI18n } from "@/i18n/server";
 import { activityHref, parseActivityParams, type RawSearchParams } from "@/lib/activity";
 import { elapsedWorkingDays, periodFor } from "@/lib/calendar";
@@ -120,6 +120,8 @@ export default async function ContributorPage({
           </div>
         }
       />
+
+      {raw.kind === "error" && typeof raw.msg === "string" ? <Notice kind="error">{raw.msg}</Notice> : null}
 
       {/* Les trois tuiles prennent la largeur des commandes de période, pour s'aligner dessus. */}
       <div className="flex flex-wrap gap-3">

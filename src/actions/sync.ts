@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { fill, type Messages } from "@/i18n";
 import { getI18n } from "@/i18n/server";
-import { githubConnection } from "@/lib/config";
-import { describeError, GitHubClient } from "@/lib/github";
+import { describeError } from "@/lib/github";
+import { connectedClient } from "@/lib/github-client";
 import { getStore } from "@/lib/runtime";
-import { syncAllRepos, syncRepo, type SyncRepoResult } from "@/lib/sync";
+import { syncRepo, type SyncRepoResult } from "@/lib/sync";
+import { runSyncAll } from "@/lib/sync-runner";
 
 function refresh() {
   revalidatePath("/");
@@ -27,10 +28,10 @@ export async function summarizeSync(results: SyncRepoResult[], m: Messages): Pro
     .join(" · ");
 }
 
-function client(m: Messages): GitHubClient {
-  const connection = githubConnection();
-  if (!connection) throw new Error(m.sync.notConnected);
-  return new GitHubClient(connection.token);
+async function client(m: Messages) {
+  const gh = await connectedClient();
+  if (!gh) throw new Error(m.sync.notConnected);
+  return gh;
 }
 
 async function finish(results: SyncRepoResult[], failure: string | null, m: Messages): Promise<never> {
@@ -40,16 +41,29 @@ async function finish(results: SyncRepoResult[], failure: string | null, m: Mess
   redirect(`/settings?kind=${kind}&msg=${encodeURIComponent(message)}`);
 }
 
-export async function runSync() {
+/** Chemin local sûr pour un retour : une URL absolue ou protocolaire renverrait ailleurs. */
+function localPath(value: FormDataEntryValue | null): string {
+  const path = typeof value === "string" ? value : "";
+  return path.startsWith("/") && !path.startsWith("//") ? path : "/settings";
+}
+
+/** Synchronisation depuis la barre d'outils : on revient sur la page de départ, l'échec en bandeau. */
+export async function runSync(formData: FormData) {
   const { m } = await getI18n();
-  let results: SyncRepoResult[] = [];
+  const back = localPath(formData.get("back"));
   let failure: string | null = null;
+  let results: SyncRepoResult[] = [];
   try {
-    results = await syncAllRepos(getStore(), client(m), { describe: (err) => describeError(err, m) });
+    // Une synchronisation déjà en cours (planificateur, assistant) est rejointe, pas doublée.
+    results = await runSyncAll({ describe: (err) => describeError(err, m) });
   } catch (err) {
     failure = describeError(err, m);
   }
-  await finish(results, failure, m);
+  refresh();
+  const failed = results.filter((r) => !r.ok);
+  const message = failure ?? (failed.length > 0 ? await summarizeSync(failed, m) : null);
+  if (!message) redirect(back);
+  redirect(`${back}${back.includes("?") ? "&" : "?"}kind=error&msg=${encodeURIComponent(message)}`);
 }
 
 /** Synchronise un seul dépôt, depuis sa ligne dans les paramètres. */
@@ -62,7 +76,7 @@ export async function runSyncOne(id: string) {
   let results: SyncRepoResult[] = [];
   let failure: string | null = null;
   try {
-    results = [await syncRepo(store, client(m), repo, { describe: (err) => describeError(err, m) })];
+    results = [await syncRepo(store, await client(m), repo, { describe: (err) => describeError(err, m) })];
   } catch (err) {
     failure = describeError(err, m);
   }

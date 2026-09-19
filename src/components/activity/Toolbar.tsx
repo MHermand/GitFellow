@@ -1,6 +1,6 @@
 import { runSync } from "@/actions/sync";
 import type { ChipItem } from "@/lib/activity-view";
-import type { ActivityParams } from "@/lib/activity";
+import { activityHref, type ActivityParams } from "@/lib/activity";
 import { FilterMenus } from "./FilterMenus";
 import { SyncButton } from "./SyncButton";
 
@@ -24,6 +24,7 @@ export function ActivityToolbar({
     <div className="flex items-center gap-1">
       <FilterMenus params={params} today={today} people={people} repos={repos} hue={hue} base={base} />
       <form action={runSync}>
+        <input type="hidden" name="back" value={activityHref(params, {}, today, base)} />
         <SyncButton />
       </form>
     </div>

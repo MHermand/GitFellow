@@ -203,6 +203,7 @@ export const en = {
       expired: "The code has expired — start again.",
       denied: "Access was denied on GitHub.",
       tokenTitle: "Or paste a personal access token",
+      tokenTitleOnly: "Paste a personal access token",
       tokenPlaceholder: "ghp_… or github_pat_…",
       tokenHelp: "Create it on github.com/settings/tokens: scope “repo” for a classic token, or read access to Contents, Metadata and Pull requests for a fine-grained one.",
       tokenButton: "Connect",

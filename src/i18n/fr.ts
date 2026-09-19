@@ -199,6 +199,7 @@ export const fr: Messages = {
       expired: "Le code a expiré — recommencez.",
       denied: "L'accès a été refusé sur GitHub.",
       tokenTitle: "Ou collez un jeton d'accès personnel",
+      tokenTitleOnly: "Collez un jeton d'accès personnel",
       tokenPlaceholder: "ghp_… ou github_pat_…",
       tokenHelp: "À créer sur github.com/settings/tokens : portée « repo » pour un jeton classique, ou lecture de Contents, Metadata et Pull requests pour un jeton fine-grained.",
       tokenButton: "Connecter",

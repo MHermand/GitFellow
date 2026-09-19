@@ -70,6 +70,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
         }
       />
 
+      {raw.kind === "error" && typeof raw.msg === "string" ? <Notice kind="error">{raw.msg}</Notice> : null}
       {repos.length === 0 ? (
         <Notice kind="info">
           {m.activity.noRepos}{" "}

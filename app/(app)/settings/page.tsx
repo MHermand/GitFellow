@@ -4,6 +4,8 @@ import { SettingsView } from "@/components/settings/SettingsView";
 import { groupDetectedAuthors, resolveContributor } from "@/lib/attribution";
 import { loadContributors, loadRepos, loadSettings, toContributorRow, trackingFloors } from "@/lib/data";
 import { getI18n } from "@/i18n/server";
+import { githubConnection } from "@/lib/config";
+import { accessibleRepos } from "@/lib/repos-catalog";
 import { fmtDateTime } from "@/lib/format";
 import { getStore } from "@/lib/runtime";
 import { parseTargetUnit } from "@/lib/target";
@@ -22,6 +24,12 @@ export default async function SettingsPage({
   const [settings, repos, contributorsDb] = await Promise.all([loadSettings(store), loadRepos(store), loadContributors(store)]);
   const tz = settings.timezone;
   const identities = await store.identitySummary(trackingFloors(repos, tz));
+  const connection = githubConnection();
+  const tracked = new Set(repos.map((r) => `${r.owner}/${r.name}`.toLowerCase()));
+  // La liste des dépôts du compte vient de GitHub (dix minutes de cache) ; sans elle, la saisie libre reste.
+  const choices = await accessibleRepos()
+    .then((list) => list.filter((r) => !tracked.has(r.fullName.toLowerCase())).map((r) => ({ fullName: r.fullName, private: r.private, archived: r.archived })))
+    .catch(() => []);
   const contributors = contributorsDb.map(toContributorRow);
 
   const repoItems: RepoItem[] = repos.map((repo) => ({
@@ -82,6 +90,8 @@ export default async function SettingsPage({
         postMinutes: settings.post_minutes,
       }}
       locale={settings.locale ?? "auto"}
+      account={connection ? { login: connection.login, avatarUrl: connection.avatarUrl, method: connection.method } : null}
+      choices={choices}
     />
   );
 }
