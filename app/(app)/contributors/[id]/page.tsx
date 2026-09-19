@@ -110,13 +110,7 @@ export default async function ContributorPage({
         actions={
           <div className="flex flex-wrap items-center gap-4">
             <ActivityToolbar params={range} today={today} people={chips.people} repos={chips.repos} hue={hue} base={base} />
-            <PeriodControls
-              params={range}
-              today={today}
-              prevDay={period.prevDay}
-              nextDay={period.nextDay}
-              hrefFor={(patch) => activityHref(range, patch, today, base)}
-            />
+            <PeriodControls params={range} today={today} prevDay={period.prevDay} nextDay={period.nextDay} base={base} />
           </div>
         }
       />

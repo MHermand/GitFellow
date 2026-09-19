@@ -24,17 +24,17 @@ export function PeriodControls({
   today,
   prevDay,
   nextDay,
-  hrefFor,
+  base,
 }: {
   params: ActivityParams;
   today: string;
   prevDay: string;
   nextDay: string;
-  /** Destination de chaque commande ; par défaut la page d'activité avec ses filtres. */
-  hrefFor?: (patch: { view?: View; day?: string }) => string;
+  /** Page visée par chaque commande (la fiche d'une personne, par exemple) ; par défaut le rapport. */
+  base?: string;
 }) {
   const { m } = useI18n();
-  const href = hrefFor ?? ((patch: { view?: View; day?: string }) => activityHref(params, patch, today));
+  const href = (patch: { view?: View; day?: string }) => activityHref(params, patch, today, base);
   return (
     <div className="flex w-full items-center gap-2 lg:w-72">
       <div className="inline-flex flex-1 justify-between rounded-[10px] bg-track p-[3px]" role="group" aria-label={m.views.group}>

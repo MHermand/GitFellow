@@ -10,7 +10,10 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "pack": "node scripts/pack.mjs",
+    "start:packed": "node dist/bin/gitfellow.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
@@ -29,6 +32,7 @@
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^15.15.0",
+    "playwright": "^1.63.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.38.0",
@@ -36,5 +40,21 @@
   },
   "engines": {
     "node": ">=22.13"
-  }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MHermand/GitFellow.git"
+  },
+  "homepage": "https://github.com/MHermand/GitFellow#readme",
+  "keywords": [
+    "github",
+    "commits",
+    "time-tracking",
+    "team",
+    "dashboard",
+    "activity",
+    "sqlite",
+    "local-first"
+  ]
 }
