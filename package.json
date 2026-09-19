@@ -1,0 +1,40 @@
+{
+  "name": "gitfellow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GitFellow - see how your team's time goes into GitHub: estimated work sessions from commits, per person, per week.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@date-fns/tz": "^1.5.0",
+    "date-fns": "^4.4.0",
+    "next": "^16.3.5",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22.16.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.32.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^15.15.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.38.0",
+    "vitest": "^4.0.18"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

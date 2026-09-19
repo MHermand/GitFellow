@@ -1,0 +1,21 @@
+# Dependencies
+node_modules
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# Paquet npm assemblé par scripts/pack.mjs
+dist/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Misc
+*.log
+.DS_Store
+scripts/out/

@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+/* Thème « Hub Colibrimo » : mêmes valeurs que les tokens shadcn du hub, résolues en hex. */
+:root {
+  color-scheme: light;
+  --bg: #f8fafc; /* background · hsl(210 40% 98%) */
+  --surface: #ffffff; /* card */
+  --ink: #0f172a; /* foreground · hsl(222.2 47.4% 11.2%) */
+  --ink-2: #64748b; /* muted-foreground · hsl(215.4 16.3% 46.9%) */
+  --muted: #94a3b8; /* texte tertiaire */
+  --line: #e2e8f0; /* border · hsl(214.3 31.8% 91.4%) */
+  --line-strong: #cbd5e1;
+  --accent: #4f46e5; /* primary · hsl(243.4 75.4% 58.6%) */
+  --accent-fg: #463acb; /* accent-foreground · hsl(245 58% 51%) */
+  --accent-soft: #eef2ff; /* accent · hsl(226 100% 96.7%) */
+  --track: #f1f5f9; /* muted · hsl(210 40% 96.1%) */
+  --danger: #e11d48; /* destructive · hsl(346.8 77.2% 49.8%) */
+  --data: #2a78d6; /* teinte des données, première place du jeu catégoriel */
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-track: var(--track);
+  --color-danger: var(--danger);
+  --color-data: var(--data);
+  /* États des jauges : success / warning / danger du hub, plus un orange intermédiaire. */
+  --color-good: #10b981;
+  --color-warning: #d97706;
+  --color-serious: #f97316;
+  --color-critical: #dc2626;
+  --font-sans: var(--font-inter, system-ui), system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Rayons du hub : --radius 0.75rem → md = 10px, lg = 12px. */
+  --radius-md: 10px;
+  --radius-lg: 12px;
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
