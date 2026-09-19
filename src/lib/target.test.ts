@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dailyTargetHours, parseTargetUnit, targetForWorkingDays, targetUnitLabel } from "./target";
+import { dailyTargetHours, parseTargetUnit, targetForWorkingDays } from "./target";
 
 const tz = "Europe/Paris";
 // Septembre 2026 : 22 jours ouvrés (le 1er est un mardi, le 30 un mercredi).
@@ -39,9 +39,5 @@ describe("parseTargetUnit", () => {
     expect(parseTargetUnit("week")).toBe("week");
     expect(parseTargetUnit("annee")).toBe("week");
     expect(parseTargetUnit(null)).toBe("week");
-  });
-
-  it("nomme chaque unité", () => {
-    expect(targetUnitLabel("day")).toBe("jour");
   });
 });

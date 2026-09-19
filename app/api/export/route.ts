@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getI18n } from "@/i18n/server";
 import { loadCommitsBetween, loadSettings, toContributorRow, toReportParams } from "@/lib/data";
 import { buildReport, sessionsByDay } from "@/lib/report";
 import { getStore } from "@/lib/runtime";
@@ -16,6 +17,7 @@ const DAY = 86_400_000;
  */
 export async function GET(request: NextRequest) {
   const store = getStore();
+  const { m } = await getI18n();
   const { searchParams } = new URL(request.url);
   const contributorId = searchParams.get("contributor");
   if (!contributorId) return NextResponse.json({ error: "contributor manquant" }, { status: 400 });
@@ -55,7 +57,7 @@ export async function GET(request: NextRequest) {
   const toDay = fmtInTz(week ? new Date(to.getTime() - 1) : new Date(to.getTime() - DAY - 1), tz, "yyyy-MM-dd");
   const days = sessionsByDay(reports[0].sessions, tz).filter((d) => d.day >= fromDay && d.day <= toDay);
 
-  const lines = ["Contributeur;Jour;Début;Fin;Durée conventionnelle (min);Durée brute (min);Commits;Dépôts"];
+  const lines = [m.export.headers.join(";")];
   for (const day of days) {
     for (const session of day.sessions) {
       const repos = [...new Set(session.events.map((e) => e.repo))].join(" ");
@@ -76,7 +78,7 @@ export async function GET(request: NextRequest) {
     }
   }
   const total = days.reduce((sum, d) => sum + d.minutes, 0);
-  lines.push(["TOTAL", "", "", "", String(total), "", "", ""].join(";"));
+  lines.push([m.export.total, "", "", "", String(total), "", "", ""].join(";"));
 
   const filename = `gitfellow_${slug(contributor.displayName)}_${label}.csv`;
   return new NextResponse(`\uFEFF${lines.join("\r\n")}\r\n`, {

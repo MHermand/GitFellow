@@ -1,16 +1,54 @@
 /**
  * Client minimal de l'API REST GitHub (fetch natif, pas de dépendance).
- * Token attendu : fine-grained PAT en lecture seule (Contents, Metadata, Pull requests) sur les repos suivis.
+ * Token attendu : celui de la connexion par GitHub (device flow), ou un jeton personnel en lecture
+ * (Contents, Metadata, Pull requests) sur les dépôts suivis.
  */
-const API = "https://api.github.com";
+import { fill, type Messages } from "@/i18n";
 
+const API = "https://api.github.com";
+const USER_AGENT = "gitfellow";
+
+export type GitHubErrorKind = "not_found" | "rate_limited" | "unauthorized" | "http";
+
+/** Réponse en erreur de GitHub : de quoi la décrire dans la langue de l'utilisateur. */
 export class GitHubError extends Error {
   readonly status: number;
-  constructor(message: string, status: number) {
-    super(message);
+  readonly path: string;
+  readonly kind: GitHubErrorKind;
+  /** Fin du quota, pour un 403/429 de limitation. */
+  readonly resetAt: string | null;
+  readonly body: string;
+
+  constructor(status: number, path: string, kind: GitHubErrorKind, resetAt: string | null, body: string) {
+    super(`GitHub answered ${status} on ${path}${body ? `: ${body.slice(0, 200)}` : ""}`);
     this.name = "GitHubError";
     this.status = status;
+    this.path = path;
+    this.kind = kind;
+    this.resetAt = resetAt;
+    this.body = body;
   }
+}
+
+/** Message d'une erreur GitHub dans la langue donnée. */
+export function describeGitHubError(err: GitHubError, m: Messages): string {
+  const head = fill(m.github.status, { status: err.status, path: err.path });
+  switch (err.kind) {
+    case "not_found":
+      return `${head} — ${m.github.notFound}`;
+    case "rate_limited":
+      return `${head} — ${fill(m.github.rateLimited, { at: err.resetAt ?? "?" })}`;
+    case "unauthorized":
+      return `${head} — ${m.github.unauthorized}`;
+    default:
+      return err.body ? `${head} — ${err.body.slice(0, 200)}` : head;
+  }
+}
+
+/** Message de n'importe quelle erreur, les erreurs GitHub traduites. */
+export function describeError(err: unknown, m: Messages): string {
+  if (err instanceof GitHubError) return describeGitHubError(err, m);
+  return err instanceof Error ? err.message : String(err);
 }
 
 export interface GhCommit {
@@ -71,6 +109,15 @@ function mapCommit(raw: RawCommit): GhCommit {
   };
 }
 
+async function toError(res: Response, path: string): Promise<GitHubError> {
+  const body = await res.text().catch(() => "");
+  const limited = (res.status === 403 || res.status === 429) && res.headers.get("x-ratelimit-remaining") === "0";
+  const reset = res.headers.get("x-ratelimit-reset");
+  const kind =
+    res.status === 404 ? "not_found" : limited ? "rate_limited" : res.status === 401 ? "unauthorized" : "http";
+  return new GitHubError(res.status, path, kind, limited && reset ? new Date(Number(reset) * 1000).toISOString() : null, body);
+}
+
 export class GitHubClient {
   constructor(private readonly token: string) {}
 
@@ -83,25 +130,12 @@ export class GitHubClient {
         Authorization: `Bearer ${this.token}`,
         Accept: "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "cra-dashboard",
+        "User-Agent": USER_AGENT,
       },
       cache: "no-store",
     });
 
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      let message = `GitHub a répondu ${res.status} sur ${path}`;
-      if (res.status === 404) {
-        message += " : dépôt introuvable ou token sans accès à ce dépôt";
-      } else if ((res.status === 403 || res.status === 429) && res.headers.get("x-ratelimit-remaining") === "0") {
-        const reset = res.headers.get("x-ratelimit-reset");
-        const at = reset ? new Date(Number(reset) * 1000).toISOString() : "?";
-        message += ` : quota de l'API épuisé, réinitialisation à ${at}`;
-      } else if (body) {
-        message += ` : ${body.slice(0, 200)}`;
-      }
-      throw new GitHubError(message, res.status);
-    }
+    if (!res.ok) throw await toError(res, path);
 
     const link = res.headers.get("link") ?? "";
     return { data: (await res.json()) as T, hasNext: /rel="next"/.test(link) };

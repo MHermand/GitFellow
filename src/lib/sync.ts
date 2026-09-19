@@ -49,19 +49,25 @@ export interface SyncOptions {
   now?: Date;
   /** Appelé avant chaque dépôt : de quoi afficher une progression. */
   onRepo?: (repo: RepoRow, index: number, total: number) => void;
+  /** Texte d'une erreur, tel qu'il sera enregistré et affiché (traduit par l'appelant). */
+  describe?: (err: unknown) => string;
 }
+
+const describeDefault = (err: unknown) => (err instanceof Error ? err.message : String(err));
 
 export async function syncAllRepos(store: Store, gh: GitHubApi, options: SyncOptions = {}): Promise<SyncRepoResult[]> {
   const repos = (await store.repos()).filter((r) => r.enabled);
   const results: SyncRepoResult[] = [];
   for (const [index, repo] of repos.entries()) {
     options.onRepo?.(repo, index, repos.length);
-    results.push(await syncRepo(store, gh, repo, options.now));
+    results.push(await syncRepo(store, gh, repo, options));
   }
   return results;
 }
 
-export async function syncRepo(store: Store, gh: GitHubApi, repo: RepoRow, now: Date = new Date()): Promise<SyncRepoResult> {
+export async function syncRepo(store: Store, gh: GitHubApi, repo: RepoRow, options: SyncOptions = {}): Promise<SyncRepoResult> {
+  const now = options.now ?? new Date();
+  const describe = options.describe ?? describeDefault;
   const label = `${repo.owner}/${repo.name}`;
   try {
     const since = syncSince(repo);
@@ -103,7 +109,7 @@ export async function syncRepo(store: Store, gh: GitHubApi, repo: RepoRow, now: 
     await store.updateRepo(repo.id, { last_synced_at: now.toISOString(), last_sync_error: null, last_sync_commits: rows.length });
     return { repoId: repo.id, repo: label, ok: true, branches: branches.length, commits: rows.length, pullRequestLookups, error: null };
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = describe(err);
     await store.updateRepo(repo.id, { last_sync_error: message });
     return { repoId: repo.id, repo: label, ok: false, branches: 0, commits: 0, pullRequestLookups: 0, error: message };
   }

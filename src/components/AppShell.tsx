@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ComponentType, type SVGProps } from "react";
+import { useI18n } from "@/i18n/client";
+import type { Messages } from "@/i18n";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, GridIcon, SlidersIcon } from "./icons";
 
 /** Teinte posée par la page affichée (PageHue), le bleu de données quand la page n'en pose pas. */
@@ -10,14 +12,15 @@ const HUE = "var(--page-hue, var(--data))";
 
 interface NavItem {
   href: string;
-  label: string;
+  /** Clé du libellé dans `nav`. */
+  key: "activity" | "settings";
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
   matches: (path: string) => boolean;
 }
 
 interface NavSection {
   id: string;
-  label: string;
+  key: "section";
   items: NavItem[];
 }
 
@@ -28,17 +31,17 @@ interface NavSection {
 const SECTIONS: NavSection[] = [
   {
     id: "tracking",
-    label: "Suivi",
+    key: "section",
     items: [
       {
         href: "/",
-        label: "Activité",
+        key: "activity",
         Icon: GridIcon,
         matches: (path) => path === "/" || path.startsWith("/contributors"),
       },
       {
         href: "/settings",
-        label: "Paramètres",
+        key: "settings",
         Icon: SlidersIcon,
         matches: (path) => path.startsWith("/settings"),
       },
@@ -69,16 +72,16 @@ function Brand({ withName, size = 28 }: { withName: boolean; size?: number }) {
 }
 
 /** Pied du bandeau : le compte GitHub connecté, qui mène aux paramètres. */
-function Identity({ login, avatarUrl, open }: { login: string | null; avatarUrl: string | null; open: boolean }) {
+function Identity({ login, avatarUrl, open, m }: { login: string | null; avatarUrl: string | null; open: boolean; m: Messages }) {
   if (!login) {
     return (
-      <Link href="/setup" className="text-xs text-ink-2 hover:text-ink" title="Connecter GitHub">
-        {open ? "Connecter GitHub" : "GH"}
+      <Link href="/setup" className="text-xs text-ink-2 hover:text-ink" title={m.nav.connect}>
+        {open ? m.nav.connect : "GH"}
       </Link>
     );
   }
   return (
-    <Link href="/settings#github" className="flex min-w-0 items-center gap-2.5" title={`@${login} · GitHub`}>
+    <Link href="/settings#github" className="flex min-w-0 items-center gap-2.5" title={m.nav.account.replace("{login}", login)}>
       <img src={avatarOf(login, avatarUrl)} alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded-full bg-track" />
       {open ? <span className="min-w-0 flex-1 truncate text-xs text-ink-2">@{login}</span> : null}
     </Link>
@@ -91,6 +94,7 @@ function Identity({ login, avatarUrl, open }: { login: string | null; avatarUrl:
  * permet à une page (l'agenda) de tenir exactement dans la hauteur disponible.
  */
 export function AppShell({ login, avatarUrl, children }: { login: string | null; avatarUrl: string | null; children: React.ReactNode }) {
+  const { m } = useI18n();
   const pathname = usePathname() ?? "/";
   const current = NAV_ITEMS.find((item) => item.matches(pathname)) ?? NAV_ITEMS[0];
   const [collapsed, setCollapsed] = useState<string[]>([]);
@@ -150,8 +154,8 @@ export function AppShell({ login, avatarUrl, children }: { login: string | null;
           type="button"
           onClick={toggleRail}
           aria-expanded={open}
-          aria-label={open ? "Replier la barre latérale" : "Déplier la barre latérale"}
-          title={open ? "Replier la barre latérale" : "Déplier la barre latérale"}
+          aria-label={open ? m.nav.collapse : m.nav.expand}
+          title={open ? m.nav.collapse : m.nav.expand}
           className="group/grip absolute inset-y-0 -right-1.5 z-10 w-3 cursor-pointer"
         >
           {/* Le filet s'annonce dès que la souris entre dans le bandeau, et s'affirme sur la poignée. */}
@@ -170,7 +174,7 @@ export function AppShell({ login, avatarUrl, children }: { login: string | null;
           <Brand withName={open} />
         </div>
         <nav
-          aria-label="Navigation principale"
+          aria-label={m.nav.main}
           className={`flex flex-1 flex-col gap-2 overflow-y-auto ${open ? "p-3" : "items-center p-2"}`}
         >
           {SECTIONS.map((section) => {
@@ -189,7 +193,7 @@ export function AppShell({ login, avatarUrl, children }: { login: string | null;
                     holdsCurrent && !expanded ? "text-accent-fg" : "text-muted hover:text-ink-2"
                   }`}
                 >
-                  <span>{section.label}</span>
+                  <span>{m.nav[section.key]}</span>
                   <ChevronDownIcon
                     className={`h-3.5 w-3.5 opacity-0 transition-[transform,opacity] group-hover:opacity-100 group-focus-visible:opacity-100 ${
                       expanded ? "" : "-rotate-90 opacity-100"
@@ -208,8 +212,8 @@ export function AppShell({ login, avatarUrl, children }: { login: string | null;
                         <Link
                           href={item.href}
                           aria-current={active ? "page" : undefined}
-                          aria-label={open ? undefined : item.label}
-                          title={open ? undefined : item.label}
+                          aria-label={open ? undefined : m.nav[item.key]}
+                          title={open ? undefined : m.nav[item.key]}
                           className={`relative flex items-center rounded-lg text-sm transition-colors ${
                             open ? "gap-2.5 px-3 py-2" : "h-10 w-10 justify-center"
                           } ${
@@ -221,7 +225,7 @@ export function AppShell({ login, avatarUrl, children }: { login: string | null;
                           }`}
                         >
                           <item.Icon className={`h-4 w-4 ${active && open ? "text-accent" : ""}`} />
-                          {open ? item.label : null}
+                          {open ? m.nav[item.key] : null}
                         </Link>
                       </li>
                     );
@@ -233,7 +237,7 @@ export function AppShell({ login, avatarUrl, children }: { login: string | null;
         </nav>
 
         <div className={`flex shrink-0 items-center gap-2.5 border-t border-line ${open ? "px-3 py-2.5" : "justify-center px-2 py-2.5"}`}>
-          <Identity login={login} avatarUrl={avatarUrl} open={open} />
+          <Identity login={login} avatarUrl={avatarUrl} open={open} m={m} />
         </div>
       </aside>
 
@@ -242,7 +246,7 @@ export function AppShell({ login, avatarUrl, children }: { login: string | null;
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-line px-4 md:hidden">
           <div className="flex items-center gap-4">
             <Brand withName size={24} />
-            <nav aria-label="Navigation principale" className="flex gap-1">
+            <nav aria-label={m.nav.main} className="flex gap-1">
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
@@ -252,12 +256,12 @@ export function AppShell({ login, avatarUrl, children }: { login: string | null;
                     item === current ? "bg-accent-soft text-accent-fg" : "text-ink-2"
                   }`}
                 >
-                  {item.label}
+                  {m.nav[item.key]}
                 </Link>
               ))}
             </nav>
           </div>
-          <Identity login={login} avatarUrl={avatarUrl} open />
+          <Identity login={login} avatarUrl={avatarUrl} open m={m} />
         </header>
         <main className="min-w-0 flex-1 space-y-6 overflow-y-auto p-4 md:p-6">{children}</main>
       </div>

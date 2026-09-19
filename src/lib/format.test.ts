@@ -8,9 +8,11 @@ describe("format", () => {
     expect(fmtMinutes(59.6)).toBe("1h00");
   });
   it("fmtPercent utilise une espace fine insécable", () => {
-    expect(fmtPercent(0.317)).toBe("32\u202f%");
+    expect(fmtPercent(0.317, "fr")).toBe("32\u202f%");
+    expect(fmtPercent(0.317, "en")).toBe("32%");
   });
   it("fmtHoursDecimal", () => {
-    expect(fmtHoursDecimal(90)).toBe("1,50");
+    expect(fmtHoursDecimal(90, 2, "fr")).toBe("1,50");
+    expect(fmtHoursDecimal(90)).toBe("1.50");
   });
 });

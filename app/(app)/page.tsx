@@ -8,6 +8,7 @@ import { StatCard } from "@/components/activity/cards";
 import { PeriodStats, RepoStats, RhythmChart, TrendChart } from "@/components/activity/charts";
 import { PageHue } from "@/components/PageHue";
 import { Notice, PageHeader } from "@/components/ui";
+import { getI18n } from "@/i18n/server";
 import { parseActivityParams, type RawSearchParams } from "@/lib/activity";
 import { buildActivityView } from "@/lib/activity-view";
 import { periodFor } from "@/lib/calendar";
@@ -22,6 +23,7 @@ const DAY = 86_400_000;
 
 export default async function ActivityPage({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
   const store = getStore();
+  const { locale, m } = await getI18n();
   const raw = await searchParams;
 
   const [settings, contributorsDb, repos] = await Promise.all([
@@ -35,7 +37,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
   const thisWeek = currentWeek(tz, now);
 
   const params = parseActivityParams(raw, tz, now);
-  const period = periodFor(params.view, params.day, tz);
+  const period = periodFor(params.view, params.day, tz, locale);
   // La tendance se calcule par rapport à la période affichée, sans dépasser la semaine en cours.
   const reference = compareWeeks(period.week, thisWeek) < 0 ? period.week : thisWeek;
   const trendWeeks = weeksRange(addWeeksToKey(reference, -1, tz), 7, tz);
@@ -52,14 +54,13 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
   const contributors = contributorsDb.filter((c) => c.active).map(toContributorRow);
   const { reports } = buildReport(commits, contributors, toReportParams(settings));
 
-  const view = buildActivityView({ params, period, reports, contributors, repoLabels, tz, today, thisWeek, trendWeeks });
-
+  const view = buildActivityView({ params, period, reports, contributors, repoLabels, tz, today, thisWeek, trendWeeks, locale });
 
   return (
     <div className="flex flex-col gap-6 lg:h-full lg:min-h-0">
       <PageHue hue={view.hue} />
       <PageHeader
-        title="Rapport d'activité"
+        title={m.activity.title}
         subtitle={period.label}
         actions={
           <div className="flex flex-wrap items-center gap-4">
@@ -71,18 +72,18 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
 
       {repos.length === 0 ? (
         <Notice kind="info">
-          Aucun dépôt suivi. Ajoute-en un dans{" "}
+          {m.activity.noRepos}{" "}
           <Link href="/settings" className="underline">
-            Paramètres
+            {m.common.settings}
           </Link>
           .
         </Notice>
       ) : null}
       {contributors.length === 0 ? (
         <Notice kind="info">
-          Aucun contributeur actif. Déclare les identités GitHub et les seuils dans{" "}
+          {m.activity.noContributors}{" "}
           <Link href="/settings" className="underline">
-            Paramètres
+            {m.common.settings}
           </Link>
           .
         </Notice>
@@ -103,16 +104,16 @@ export default async function ActivityPage({ searchParams }: { searchParams: Pro
           <StatCard title={view.periodTitle}>
             <PeriodStats summary={view.summary} />
           </StatCard>
-          <StatCard title="Par dépôt">
+          <StatCard title={m.activity.byRepo}>
             <RepoStats repos={view.repoStats} />
           </StatCard>
           {view.rhythm ? (
-            <StatCard title="Rythme">
+            <StatCard title={m.activity.rhythm}>
               <RhythmChart rhythm={view.rhythm} hue={view.hue} />
             </StatCard>
           ) : null}
           {view.trend.length > 0 ? (
-            <StatCard title="Tendance" fill>
+            <StatCard title={m.activity.trend} fill>
               <TrendChart points={view.trend} thresholdHours={view.trendThreshold} color={view.hue} />
             </StatCard>
           ) : null}

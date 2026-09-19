@@ -1,5 +1,10 @@
+"use client";
+
+import { useI18n } from "@/i18n/client";
+
 /** Squelette affiché pendant le rendu serveur d'une page ; la coquille (barre latérale, en-tête) reste en place. */
 export default function Loading() {
+  const { m } = useI18n();
   return (
     <div aria-busy="true" aria-live="polite" className="animate-pulse space-y-6">
       <div className="space-y-2">
@@ -12,7 +17,7 @@ export default function Loading() {
           <div key={i} className="h-24 rounded-xl border border-line bg-surface" />
         ))}
       </div>
-      <span className="sr-only">Chargement…</span>
+      <span className="sr-only">{m.common.loading}</span>
     </div>
   );
 }

@@ -4,7 +4,8 @@
  */
 import { TZDate } from "@date-fns/tz";
 import { addWeeks, format, getISOWeek, getISOWeekYear, startOfISOWeek } from "date-fns";
-import { fr } from "date-fns/locale";
+import { DEFAULT_LOCALE, messages, type Locale } from "@/i18n";
+import { dateFnsLocale } from "./locale-dates";
 
 export interface WeekKey {
   year: number;
@@ -76,29 +77,31 @@ export function dayKey(date: Date, tz: string): string {
   return format(new TZDate(date, tz), "yyyy-MM-dd");
 }
 
-export function fmtInTz(date: Date, tz: string, pattern: string): string {
-  return format(new TZDate(date, tz), pattern, { locale: fr });
+export function fmtInTz(date: Date, tz: string, pattern: string, locale: Locale = DEFAULT_LOCALE): string {
+  return format(new TZDate(date, tz), pattern, { locale: dateFnsLocale(locale) });
 }
 
-/** "14 → 20 sept. 2026" */
-export function weekLabel(key: WeekKey, tz: string): string {
+/** "14 → 20 sept. 2026" · "Sep 14 → 20, 2026" */
+export function weekLabel(key: WeekKey, tz: string, locale: Locale = DEFAULT_LOCALE): string {
+  const { dates } = messages(locale);
   const start = new TZDate(weekStart(key, tz), tz);
   const end = new TZDate(weekEnd(key, tz).getTime() - 1, tz);
-  return `${format(start, "d MMM", { locale: fr })} → ${format(end, "d MMM yyyy", { locale: fr })}`;
+  return `${fmtInTz(start, tz, dates.rangeStart, locale)} → ${fmtInTz(end, tz, dates.rangeEnd, locale)}`;
 }
 
 /** "24–30 août" ou "27 juil.–2 août" */
-export function weekShortLabel(key: WeekKey, tz: string): string {
+export function weekShortLabel(key: WeekKey, tz: string, locale: Locale = DEFAULT_LOCALE): string {
+  const { dates } = messages(locale);
   const start = new TZDate(weekStart(key, tz), tz);
   const end = new TZDate(weekEnd(key, tz).getTime() - 1, tz);
   const sameMonth = start.getMonth() === end.getMonth();
   return sameMonth
-    ? `${format(start, "d", { locale: fr })}–${format(end, "d MMM", { locale: fr })}`
-    : `${format(start, "d MMM", { locale: fr })}–${format(end, "d MMM", { locale: fr })}`;
+    ? `${fmtInTz(start, tz, dates.rangeStartShort, locale)}–${fmtInTz(end, tz, dates.rangeEndShort, locale)}`
+    : `${fmtInTz(start, tz, dates.rangeStart, locale)}–${fmtInTz(end, tz, dates.rangeStart, locale)}`;
 }
 
-/** "lun. 14 sept." */
-export function dayLabel(day: string, tz: string): string {
+/** "lundi 14 septembre" · "Monday, September 14" */
+export function dayLabel(day: string, tz: string, locale: Locale = DEFAULT_LOCALE): string {
   const [y, m, d] = day.split("-").map(Number);
-  return format(new TZDate(y, m - 1, d, tz), "EEEE d MMMM", { locale: fr });
+  return format(new TZDate(y, m - 1, d, tz), messages(locale).dates.dayShort, { locale: dateFnsLocale(locale) });
 }

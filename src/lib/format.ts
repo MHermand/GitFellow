@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE, fill, messages, type Locale } from "@/i18n";
+
 export function fmtMinutes(minutes: number): string {
   const rounded = Math.round(minutes);
   const h = Math.floor(rounded / 60);
@@ -5,25 +7,32 @@ export function fmtMinutes(minutes: number): string {
   return `${h}h${String(m).padStart(2, "0")}`;
 }
 
-export function fmtHoursDecimal(minutes: number, digits = 2): string {
-  return (minutes / 60).toFixed(digits).replace(".", ",");
+function decimal(value: number, digits: number, locale: Locale): string {
+  const text = value.toFixed(digits);
+  return locale === "fr" ? text.replace(".", ",") : text;
+}
+
+export function fmtHoursDecimal(minutes: number, digits = 2, locale: Locale = DEFAULT_LOCALE): string {
+  return decimal(minutes / 60, digits, locale);
 }
 
 /** Heures d'objectif : « 70 h », ou « 67,2 h » quand la répartition ne tombe pas juste. */
-export function fmtHours(hours: number): string {
+export function fmtHours(hours: number, locale: Locale = DEFAULT_LOCALE): string {
   const rounded = Math.round(hours * 10) / 10;
-  return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1).replace(".", ",")} h`;
+  const shown = Number.isInteger(rounded) ? String(rounded) : decimal(rounded, 1, locale);
+  return fill(messages(locale).common.hours, { h: shown });
 }
 
-export function fmtPercent(ratio: number): string {
-  return `${Math.round(ratio * 100)}\u202f%`;
+export function fmtPercent(ratio: number, locale: Locale = DEFAULT_LOCALE): string {
+  return fill(messages(locale).common.percent, { n: Math.round(ratio * 100) });
 }
 
-export function fmtDateTime(iso: string | null, tz: string): string {
-  if (!iso) return "—";
-  return new Intl.DateTimeFormat("fr-FR", {
+export function fmtDateTime(iso: string | null, tz: string, locale: Locale = DEFAULT_LOCALE): string {
+  if (!iso) return messages(locale).common.none;
+  const { intl, dateTime } = messages(locale).dates;
+  return new Intl.DateTimeFormat(intl, {
     timeZone: tz,
-    dateStyle: "short",
-    timeStyle: "short",
+    dateStyle: dateTime.dateStyle as "short" | "medium",
+    timeStyle: dateTime.timeStyle as "short",
   }).format(new Date(iso));
 }

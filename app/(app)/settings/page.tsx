@@ -3,6 +3,7 @@ import type { RepoItem } from "@/components/settings/Repos";
 import { SettingsView } from "@/components/settings/SettingsView";
 import { groupDetectedAuthors, resolveContributor } from "@/lib/attribution";
 import { loadContributors, loadRepos, loadSettings, toContributorRow, trackingFloors } from "@/lib/data";
+import { getI18n } from "@/i18n/server";
 import { fmtDateTime } from "@/lib/format";
 import { getStore } from "@/lib/runtime";
 import { parseTargetUnit } from "@/lib/target";
@@ -15,6 +16,7 @@ export default async function SettingsPage({
   searchParams: Promise<{ kind?: string; msg?: string }>;
 }) {
   const store = getStore();
+  const { locale, m, t, n } = await getI18n();
   const { kind, msg } = await searchParams;
 
   const [settings, repos, contributorsDb] = await Promise.all([loadSettings(store), loadRepos(store), loadContributors(store)]);
@@ -28,10 +30,10 @@ export default async function SettingsPage({
     name: repo.name,
     trackedSince: repo.tracked_since ?? "",
     syncedLabel: repo.last_synced_at
-      ? `synchronisé le ${fmtDateTime(repo.last_synced_at, tz)}${
-          repo.last_sync_commits !== null ? ` · ${repo.last_sync_commits} commits lus` : ""
+      ? `${t(m.settings.repos.syncedAt, { date: fmtDateTime(repo.last_synced_at, tz, locale) })}${
+          repo.last_sync_commits !== null ? ` · ${t(m.settings.repos.commitsRead, { n: repo.last_sync_commits })}` : ""
         }`
-      : "jamais synchronisé",
+      : m.settings.repos.neverSynced,
     error: repo.last_sync_error,
   }));
 
@@ -55,10 +57,8 @@ export default async function SettingsPage({
     commits: author.commits,
     title: [
       author.authorNames.length > 0 ? author.authorNames.join(", ") : null,
-      author.viaPullRequests > 0
-        ? `dont ${author.viaPullRequests} commit${author.viaPullRequests > 1 ? "s" : ""} d'agent via ses pull requests`
-        : null,
-      author.lastAt ? `dernier commit le ${fmtDateTime(author.lastAt, tz)}` : null,
+      author.viaPullRequests > 0 ? n(m.settings.authors.viaPullRequests, author.viaPullRequests) : null,
+      author.lastAt ? t(m.settings.authors.lastCommit, { date: fmtDateTime(author.lastAt, tz, locale) }) : null,
     ]
       .filter(Boolean)
       .join(" · "),
@@ -81,6 +81,7 @@ export default async function SettingsPage({
         gapMinutes: settings.gap_minutes,
         postMinutes: settings.post_minutes,
       }}
+      locale={settings.locale ?? "auto"}
     />
   );
 }

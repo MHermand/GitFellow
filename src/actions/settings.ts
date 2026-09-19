@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { parseList } from "@/lib/attribution";
+import { parseLocale } from "@/i18n";
+import { getI18n } from "@/i18n/server";
 import { parseDay } from "@/lib/calendar";
 import { getStore } from "@/lib/runtime";
 import { DuplicateError } from "@/lib/store";
@@ -26,19 +28,20 @@ function optionalDay(value: FormDataEntryValue | null): string | null {
 const REPO_RE = /^(?:https?:\/\/github\.com\/)?([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/;
 
 export async function addRepo(formData: FormData) {
+  const { m, t } = await getI18n();
   const raw = String(formData.get("repo") ?? "").trim();
   const match = REPO_RE.exec(raw);
-  if (!match) back("error", "Format attendu : owner/nom (ex. MHermand/Dashboard) ou URL GitHub.");
+  if (!match) back("error", m.settings.repos.formatError);
   const [, owner, name] = match;
 
   // Sans date de début de suivi, tout l'historique du dépôt est lu.
   try {
     await getStore().addRepo({ owner, name, tracked_since: optionalDay(formData.get("tracked_since")) });
   } catch (err) {
-    back("error", err instanceof DuplicateError ? `${owner}/${name} est déjà suivi.` : String(err instanceof Error ? err.message : err));
+    back("error", err instanceof DuplicateError ? t(m.settings.repos.duplicate, { repo: `${owner}/${name}` }) : String(err instanceof Error ? err.message : err));
   }
   refresh();
-  back("success", `Dépôt ${owner}/${name} ajouté. Lance une synchronisation pour récupérer ses commits.`);
+  back("success", t(m.settings.repos.added, { repo: `${owner}/${name}` }));
 }
 
 /** Date à partir de laquelle l'activité du dépôt est synchronisée et comptée. */
@@ -52,14 +55,15 @@ export async function setRepoTrackedSince(formData: FormData) {
 
 export async function deleteRepo(formData: FormData) {
   const id = z.uuid().parse(formData.get("id"));
+  const { m } = await getI18n();
   await getStore().deleteRepo(id);
   refresh();
-  back("success", "Dépôt retiré (ses commits synchronisés ont été supprimés).");
+  back("success", m.settings.repos.removed);
 }
 
 const contributorSchema = z.object({
   id: z.uuid().optional(),
-  display_name: z.string().trim().min(1, "Le nom est obligatoire.").max(80),
+  display_name: z.string().trim().min(1, "required").max(80),
   github_logins: z.string().optional(),
   author_emails: z.string().optional(),
   author_names: z.string().optional(),
@@ -68,6 +72,7 @@ const contributorSchema = z.object({
 });
 
 export async function saveContributor(formData: FormData) {
+  const { m } = await getI18n();
   const parsed = contributorSchema.safeParse({
     id: formData.get("id") || undefined,
     display_name: formData.get("display_name"),
@@ -77,7 +82,7 @@ export async function saveContributor(formData: FormData) {
     target_hours: formData.get("target_hours") || 0,
     target_unit: formData.get("target_unit") || "week",
   });
-  if (!parsed.success) back("error", parsed.error.issues.map((i) => i.message).join(" "));
+  if (!parsed.success) back("error", parsed.error.issues.some((i) => i.message === "required") ? m.settings.authors.nameRequired : parsed.error.issues.map((i) => i.message).join(" "));
 
   const values = {
     display_name: parsed.data.display_name,
@@ -103,8 +108,9 @@ const authorSchema = z.object({
 
 /** Suit un auteur détecté : crée le contributeur avec ses identités déjà rattachées. */
 export async function trackAuthor(author: z.input<typeof authorSchema>) {
+  const { m } = await getI18n();
   const parsed = authorSchema.safeParse(author);
-  if (!parsed.success) back("error", "Auteur illisible.");
+  if (!parsed.success) back("error", m.settings.authors.unreadable);
 
   await getStore().insertContributor({
     display_name: parsed.data.displayName,
@@ -120,9 +126,10 @@ export async function trackAuthor(author: z.input<typeof authorSchema>) {
 
 export async function deleteContributor(formData: FormData) {
   const id = z.uuid().parse(formData.get("id"));
+  const { m } = await getI18n();
   await getStore().deleteContributor(id);
   refresh();
-  back("success", "Contributeur supprimé.");
+  back("success", m.settings.authors.deleted);
 }
 
 const settingsSchema = z.object({
@@ -142,4 +149,12 @@ export async function saveSettings(formData: FormData) {
   await getStore().updateSettings(parsed.data);
   // Enregistrement automatique : pas de bandeau à chaque champ quitté.
   refresh();
+}
+
+/** Langue de l'application : « auto » remet celle du navigateur. */
+export async function saveLocale(formData: FormData) {
+  const locale = parseLocale(formData.get("locale"));
+  await getStore().updateSettings({ locale });
+  revalidatePath("/", "layout");
+  redirect("/settings");
 }

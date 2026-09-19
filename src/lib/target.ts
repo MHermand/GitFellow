@@ -15,18 +15,10 @@ export interface Target {
 /** Jours ouvrés d'une semaine : base de conversion d'un objectif hebdomadaire. */
 export const WORKING_DAYS_PER_WEEK = 5;
 
-export const TARGET_UNITS: { value: TargetUnit; label: string }[] = [
-  { value: "day", label: "jour" },
-  { value: "week", label: "semaine" },
-  { value: "month", label: "mois" },
-];
+export const TARGET_UNITS: readonly TargetUnit[] = ["day", "week", "month"];
 
 export function parseTargetUnit(value: unknown): TargetUnit {
   return value === "day" || value === "month" ? value : "week";
-}
-
-export function targetUnitLabel(unit: TargetUnit): string {
-  return TARGET_UNITS.find((u) => u.value === unit)!.label;
 }
 
 export const NO_TARGET: Target = { hours: 0, unit: "week" };

@@ -144,27 +144,28 @@ export type StatusLevel = "good" | "warning" | "serious" | "critical" | "neutral
 
 export interface TargetStatus {
   level: StatusLevel;
-  label: string;
+  /** Clé du libellé dans le dictionnaire (`contributor.status`). */
+  key: "neutral" | "inProgress" | StatusLevel;
   ratio: number | null;
 }
 
 /**
  * Position par rapport à l'objectif de la période.
  *  ≥ 100 % → objectif atteint · ≥ 80 % → proche · ≥ 50 % → en dessous · < 50 % → très en dessous.
- * Une semaine en cours ou sans seuil reste neutre.
+ * Une période en cours ou sans seuil reste neutre.
  */
 export function targetStatus(
   minutes: number,
   targetHours: number,
   options: { inProgress?: boolean } = {},
 ): TargetStatus {
-  if (!targetHours || targetHours <= 0) return { level: "neutral", label: "Sans seuil", ratio: null };
+  if (!targetHours || targetHours <= 0) return { level: "neutral", key: "neutral", ratio: null };
   const ratio = minutes / (targetHours * 60);
-  if (options.inProgress) return { level: "neutral", label: "Semaine en cours", ratio };
-  if (ratio >= 1) return { level: "good", label: "Objectif atteint", ratio };
-  if (ratio >= 0.8) return { level: "warning", label: "Proche de l'objectif", ratio };
-  if (ratio >= 0.5) return { level: "serious", label: "En dessous", ratio };
-  return { level: "critical", label: "Très en dessous", ratio };
+  if (options.inProgress) return { level: "neutral", key: "inProgress", ratio };
+  if (ratio >= 1) return { level: "good", key: "good", ratio };
+  if (ratio >= 0.8) return { level: "warning", key: "warning", ratio };
+  if (ratio >= 0.5) return { level: "serious", key: "serious", ratio };
+  return { level: "critical", key: "critical", ratio };
 }
 
 export interface IdentitySummary {

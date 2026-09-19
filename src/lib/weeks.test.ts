@@ -59,8 +59,10 @@ describe("semaines ISO en Europe/Paris", () => {
   it("dayKey et libellés en français", () => {
     expect(dayKey(new Date("2026-09-14T23:30:00+02:00"), tz)).toBe("2026-09-14");
     expect(dayKey(new Date("2026-09-14T22:30:00Z"), tz)).toBe("2026-09-15");
-    expect(weekLabel({ year: 2026, week: 38 }, tz)).toBe("14 sept. → 20 sept. 2026");
-    expect(weekShortLabel({ year: 2026, week: 35 }, tz)).toBe("24–30 août");
-    expect(weekShortLabel({ year: 2026, week: 31 }, tz)).toBe("27 juil.–2 août");
+    expect(weekLabel({ year: 2026, week: 38 }, tz, "fr")).toBe("14 sept. → 20 sept. 2026");
+    expect(weekLabel({ year: 2026, week: 38 }, tz, "en")).toBe("Sep 14 → Sep 20, 2026");
+    expect(weekShortLabel({ year: 2026, week: 35 }, tz, "fr")).toBe("24–30 août");
+    expect(weekShortLabel({ year: 2026, week: 35 }, tz, "en")).toBe("24–Aug 30");
+    expect(weekShortLabel({ year: 2026, week: 31 }, tz, "fr")).toBe("27 juil.–2 août");
   });
 });

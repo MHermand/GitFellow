@@ -2,13 +2,15 @@
 
 import { useRef, useState } from "react";
 import { inputBase } from "@/components/ui";
+import { useI18n } from "@/i18n/client";
+import type { Messages } from "@/i18n";
 import { DATA_HUE, rampFor } from "@/lib/palette";
 import { fmtMinutes } from "@/lib/format";
 
 const FIELDS = [
-  { key: "pre_minutes", label: "Temps avant le premier commit", min: 0, max: 240 },
-  { key: "gap_minutes", label: "Temps maximal entre deux commits", min: 1, max: 720 },
-  { key: "post_minutes", label: "Temps après le dernier commit", min: 0, max: 240 },
+  { key: "pre_minutes", label: "pre", min: 0, max: 240 },
+  { key: "gap_minutes", label: "gap", min: 1, max: 720 },
+  { key: "post_minutes", label: "post", min: 0, max: 240 },
 ] as const;
 
 /** Colonne des libellés : les champs démarrent alors sur la même verticale que les listes du dessus. */
@@ -19,6 +21,7 @@ const LABEL_COL = "w-60 shrink-0";
  * L'enregistrement part quand un champ est quitté, pas à chaque incrément.
  */
 export function RulesFields({ pre, gap, post }: { pre: number; gap: number; post: number }) {
+  const { m } = useI18n();
   const initial = { pre_minutes: String(pre), gap_minutes: String(gap), post_minutes: String(post) };
   const [values, setValues] = useState<Record<string, string>>(initial);
   const saved = useRef<Record<string, string>>({ ...initial });
@@ -36,7 +39,7 @@ export function RulesFields({ pre, gap, post }: { pre: number; gap: number; post
         {FIELDS.map((field) => (
           <div key={field.key} className="flex max-w-[26rem] items-center gap-x-3">
             <label htmlFor={field.key} className={`${LABEL_COL} text-sm text-ink-2`}>
-              {field.label}
+              {m.settings.rules[field.label]}
             </label>
             <input
               id={field.key}
@@ -49,19 +52,19 @@ export function RulesFields({ pre, gap, post }: { pre: number; gap: number; post
               onBlur={(e) => saveIfChanged(e.currentTarget)}
               className={`${inputBase} h-9 w-9 px-0 text-center tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
             />
-            <span className="text-xs text-muted">min</span>
+            <span className="text-xs text-muted">{m.common.minutesUnit}</span>
           </div>
         ))}
       </div>
 
-      <SessionDiagram pre={shown("pre_minutes")} gap={Math.max(1, shown("gap_minutes"))} post={shown("post_minutes")} />
+      <SessionDiagram pre={shown("pre_minutes")} gap={Math.max(1, shown("gap_minutes"))} post={shown("post_minutes")} m={m} />
     </div>
   );
 }
 
-function dur(minutes: number): string {
-  if (minutes < 60) return `${Math.round(minutes)} min`;
-  return minutes % 60 === 0 ? `${minutes / 60} h` : fmtMinutes(minutes);
+function dur(minutes: number, m: Messages): string {
+  if (minutes < 60) return m.settings.rules.minutes.replace("{n}", String(Math.round(minutes)));
+  return minutes % 60 === 0 ? m.settings.rules.hoursShort.replace("{n}", String(minutes / 60)) : fmtMinutes(minutes);
 }
 
 /**
@@ -70,7 +73,8 @@ function dur(minutes: number): string {
  * sont placés en fraction de l'écart maximal, pour que le dessin reste vrai quelle qu'en
  * soit la valeur — l'écart le plus large y reste toujours inférieur au réglage.
  */
-function SessionDiagram({ pre, gap, post }: { pre: number; gap: number; post: number }) {
+function SessionDiagram({ pre, gap, post, m }: { pre: number; gap: number; post: number; m: Messages }) {
+  const r = m.settings.rules;
   const step = Math.floor(gap * 0.28);
   const widest = Math.floor(gap * 0.9);
   // L'écart le plus large est placé au milieu : la légende centrée sur le cœur tombe dessus.
@@ -108,7 +112,7 @@ function SessionDiagram({ pre, gap, post }: { pre: number; gap: number; post: nu
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full overflow-visible" role="img"
-      aria-label={`Une session d'exemple : ${pre} minutes avant le premier commit, ${post} minutes après le dernier, commits séparés d'au plus ${gap} minutes.`}>
+      aria-label={r.diagram.replace("{pre}", String(pre)).replace("{post}", String(post)).replace("{gap}", String(gap))}>
       <defs>
         <pattern id="cra-buffer" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
           <line x1="0" y1="0" x2="0" y2="6" stroke={DATA_HUE} strokeWidth={1.4} opacity={0.45} />
@@ -133,16 +137,16 @@ function SessionDiagram({ pre, gap, post }: { pre: number; gap: number; post: nu
         <circle key={i} cx={x(m)} cy={yBand + hBand / 2} r={4} fill={DATA_HUE} stroke="var(--color-surface)" strokeWidth={2} />
       ))}
 
-      {pre > 0 ? lead((x(start) + coreStart) / 2, "avant le 1er commit", `${pre} min`) : null}
-      {post > 0 ? lead((coreEnd + x(end)) / 2, "après le dernier", `${post} min`) : null}
+      {pre > 0 ? lead((x(start) + coreStart) / 2, r.beforeFirst, r.minutes.replace("{n}", String(pre))) : null}
+      {post > 0 ? lead((coreEnd + x(end)) / 2, r.afterLast, r.minutes.replace("{n}", String(post))) : null}
 
       {/* Légende de l'écart, centrée sur le cœur du bloc. */}
       <line x1={(coreStart + coreEnd) / 2} y1={yBand + hBand + 3} x2={(coreStart + coreEnd) / 2} y2={yBand + hBand + 14}
         stroke="var(--color-line-strong)" strokeWidth={1} />
       <text x={(coreStart + coreEnd) / 2} y={yBand + hBand + 28} textAnchor="middle" fontSize={11} fill="var(--color-ink-2)">
-        écart entre deux commits{" "}
+        {r.gapLegend}{" "}
         <tspan fontWeight={600} fill="var(--color-ink)" className="tnum">
-          {dur(widest)} ≤ {dur(gap)}
+          {dur(widest, m)} ≤ {dur(gap, m)}
         </tspan>
       </text>
 

@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useI18n } from "@/i18n/client";
 import { fmtMinutes } from "@/lib/format";
 import type { MonthWeekRow } from "@/lib/activity-view";
 import { weekId } from "@/lib/weeks";
@@ -6,10 +9,10 @@ import { CALENDAR_BOX } from "./frame";
 
 export type { MonthWeekRow };
 
-const DAY_NAMES = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 const HEADER_PX = 44;
 
 export function MonthGrid({ rows, hue }: { rows: MonthWeekRow[]; hue: string }) {
+  const { m } = useI18n();
   return (
     <div className={CALENDAR_BOX}>
       <div className="min-h-0 flex-1 overflow-auto">
@@ -17,8 +20,8 @@ export function MonthGrid({ rows, hue }: { rows: MonthWeekRow[]; hue: string }) 
           className="grid h-full min-w-[680px] grid-cols-[repeat(7,minmax(0,1fr))]"
           style={{ gridTemplateRows: `${HEADER_PX}px repeat(${Math.max(1, rows.length)}, minmax(88px, 1fr))` }}
         >
-          {DAY_NAMES.map((name) => (
-            <div key={name} className="flex items-center border-b border-line px-2 text-[11px] tracking-[0.04em] text-ink-2 uppercase">
+          {m.dates.weekdaysShort.map((name, i) => (
+            <div key={i} className="flex items-center border-b border-line px-2 text-[11px] tracking-[0.04em] text-ink-2 uppercase">
               {name}
             </div>
           ))}

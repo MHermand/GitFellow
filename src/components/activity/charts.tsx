@@ -1,5 +1,7 @@
 "use client";
 
+import { useI18n } from "@/i18n/client";
+import { fmtHours } from "@/lib/format";
 import { rampFor } from "@/lib/palette";
 import type { PeriodSummary, RepoStat, RhythmView, TrendPoint } from "@/lib/activity-view";
 import { StartScroll } from "./scrollers";
@@ -10,7 +12,8 @@ export type { PeriodSummary, RepoStat, RhythmView, TrendPoint };
 /** Carte de période : une seule jauge pour toutes les personnes, le détail au survol. */
 export function PeriodStats({ summary }: { summary: PeriodSummary }) {
   const { bind, layer } = useTip();
-  if (summary.people.length === 0) return <p className="text-sm text-muted">Aucune personne sélectionnée.</p>;
+  const { m } = useI18n();
+  if (summary.people.length === 0) return <p className="text-sm text-muted">{m.activity.noPeople}</p>;
   const tip = (person: PeriodSummary["people"][number]) => <TipCard title={person.name} dot={person.dot} rows={person.rows} />;
   return (
     <div className="flex flex-col gap-2">
@@ -19,7 +22,7 @@ export function PeriodStats({ summary }: { summary: PeriodSummary }) {
         {summary.suffix ? <span className="text-xs text-muted">{summary.suffix}</span> : null}
       </div>
 
-      <div className="flex h-3 w-full gap-px overflow-hidden rounded-full bg-track" aria-label="Répartition du temps par personne">
+      <div className="flex h-3 w-full gap-px overflow-hidden rounded-full bg-track" aria-label={m.activity.splitPeople}>
         {summary.people
           .filter((p) => p.share > 0)
           .map((p) => (
@@ -35,10 +38,11 @@ export function PeriodStats({ summary }: { summary: PeriodSummary }) {
 /** Répartition par dépôt : une barre empilée, le détail de chaque dépôt au survol. */
 export function RepoStats({ repos }: { repos: RepoStat[] }) {
   const { bind, layer } = useTip();
-  if (repos.length === 0) return <p className="text-sm text-muted">Aucune activité sur la période.</p>;
+  const { m } = useI18n();
+  if (repos.length === 0) return <p className="text-sm text-muted">{m.activity.noActivity}</p>;
   return (
     <div>
-      <div className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full bg-track" aria-label="Répartition du temps par dépôt">
+      <div className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full bg-track" aria-label={m.activity.splitRepos}>
         {repos.map((r) => (
           <div
             key={r.repo}
@@ -59,6 +63,7 @@ const GAP = 3;
 /** Carte jour × heure : 8h → 20h visibles, le reste au défilement latéral. */
 export function RhythmChart({ rhythm, hue }: { rhythm: RhythmView; hue: string }) {
   const { bind, layer } = useTip();
+  const { m, t } = useI18n();
   const ramp = rampFor(hue);
   const hours = Array.from({ length: 24 }, (_, h) => h);
   const track = { display: "grid", gridTemplateColumns: "repeat(24, minmax(0, 1fr))", gap: GAP, width: "200%" } as const;
@@ -84,11 +89,11 @@ export function RhythmChart({ rhythm, hue }: { rhythm: RhythmView; hue: string }
                       {...bind(
                         cell.shown ? (
                           <TipCard
-                            title={`${row.title} · ${h}h–${h + 1}h`}
+                            title={`${row.title} · ${t(m.activity.hourRange, { from: h, to: h + 1 })}`}
                             rows={[
-                              { label: "Temps", value: cell.shown },
-                              { label: "Commits", value: String(cell.commits) },
-                              { label: "Sessions", value: String(cell.sessions) },
+                              { label: m.activity.tip.time, value: cell.shown },
+                              { label: m.activity.tip.commits, value: String(cell.commits) },
+                              { label: m.activity.tip.sessions, value: String(cell.sessions) },
                             ]}
                           />
                         ) : null,
@@ -118,6 +123,7 @@ export function RhythmChart({ rhythm, hue }: { rhythm: RhythmView; hue: string }
 /** Temps par semaine, comparé au seuil cumulé des personnes sélectionnées. */
 export function TrendChart({ points, thresholdHours, color }: { points: TrendPoint[]; thresholdHours: number; color: string }) {
   const { bind, layer } = useTip();
+  const { m, t, locale } = useI18n();
   const maxMinutes = Math.max(thresholdHours * 60, ...points.map((p) => p.minutes), 60) * 1.1;
   const pct = (minutes: number) => (minutes / maxMinutes) * 100;
   // La valeur en clair va à la barre de la période affichée ; sinon à la plus haute.
@@ -152,7 +158,7 @@ export function TrendChart({ points, thresholdHours, color }: { points: TrendPoi
             <>
               <div className="absolute right-0 left-0 border-t border-dashed border-ink-2" style={{ bottom: `${pct(thresholdHours * 60)}%` }} />
               <span className="absolute left-0 bg-surface pr-1 text-[10px] text-ink-2" style={{ bottom: `calc(${pct(thresholdHours * 60)}% + 3px)` }}>
-                seuil {thresholdHours} h
+                {t(m.activity.threshold, { hours: fmtHours(thresholdHours, locale) })}
               </span>
             </>
           ) : null}

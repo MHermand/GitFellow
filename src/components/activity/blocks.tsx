@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useI18n } from "@/i18n/client";
 import type { BlockView } from "@/lib/activity-view";
 
 export type { BlockView };
@@ -20,6 +23,7 @@ export function gridBackground(hourPx: number): React.CSSProperties {
 
 /** Bloc compact (vue Semaine). */
 export function SessionBlock({ block, hourPx }: { block: BlockView; hourPx: number }) {
+  const { m, n } = useI18n();
   const top = Math.round((block.startMin / 60) * hourPx);
   const height = Math.max(18, Math.round(((block.endMin - block.startMin) / 60) * hourPx) - 2);
   const showCommits = height >= 62;
@@ -42,13 +46,14 @@ export function SessionBlock({ block, hourPx }: { block: BlockView; hourPx: numb
       <span className="tnum font-semibold whitespace-nowrap">{block.time}</span>
       <span className="truncate">{block.primary}</span>
       <span className="truncate opacity-80">{block.secondary}</span>
-      {showCommits ? <span className="opacity-70">{block.commits} commit{block.commits > 1 ? "s" : ""}</span> : null}
+      {showCommits ? <span className="opacity-70">{n(m.common.commits, block.commits)}</span> : null}
     </Link>
   );
 }
 
 /** Bloc détaillé (vue Jour) avec les commits. */
 export function DayBlock({ block, hourPx }: { block: BlockView; hourPx: number }) {
+  const { m, n } = useI18n();
   const top = Math.round((block.startMin / 60) * hourPx);
   const height = Math.max(24, Math.round(((block.endMin - block.startMin) / 60) * hourPx) - 2);
   const lines = block.lines ?? [];
@@ -83,9 +88,7 @@ export function DayBlock({ block, hourPx }: { block: BlockView; hourPx: number }
             </span>
           ))}
           {hidden > 0 ? (
-            <span className="opacity-70">
-              … {hidden} autre{hidden > 1 ? "s" : ""} commit{hidden > 1 ? "s" : ""}
-            </span>
+            <span className="opacity-70">{n(m.activity.otherCommits, hidden)}</span>
           ) : null}
         </span>
       ) : null}

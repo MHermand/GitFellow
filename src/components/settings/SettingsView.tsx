@@ -1,5 +1,6 @@
 import { saveSettings } from "@/actions/settings";
 import { Card, Notice, PageHeader } from "@/components/ui";
+import { getI18n } from "@/i18n/server";
 import {
   AuthorPicker,
   ContributorListHeader,
@@ -7,6 +8,7 @@ import {
   type AuthorItem,
   type ContributorItem,
 } from "./Contributors";
+import { LanguageField } from "./LanguageField";
 import { AddRepoForm, RepoListHeader, RepoRow, type RepoItem } from "./Repos";
 import { RulesFields } from "./RulesFields";
 
@@ -22,23 +24,25 @@ export interface SettingsViewProps {
   contributors: ContributorItem[];
   authors: AuthorItem[];
   rules: RulesValues;
+  locale: "auto" | "fr" | "en";
 }
 
 /**
  * Corps de la page Paramètres : trois cards, une ligne par dépôt et par personne.
  * Sans accès aux données, pour être rendu aussi par l'aperçu de scripts/preview-settings.tsx.
  */
-export function SettingsView({ notice, repos, contributors, authors, rules }: SettingsViewProps) {
+export async function SettingsView({ notice, repos, contributors, authors, rules, locale }: SettingsViewProps) {
+  const { m } = await getI18n();
   return (
     <>
-      <PageHeader title="Paramètres" subtitle="Dépôts suivis, contributeurs et règles de calcul." />
+      <PageHeader title={m.settings.title} subtitle={m.settings.subtitle} />
 
       {notice ? <Notice kind={notice.kind}>{notice.msg}</Notice> : null}
 
-      <Card title="Dépôts suivis">
+      <Card title={m.settings.repos.title}>
         <div>
           {repos.length === 0 ? (
-            <p className="pb-3 text-sm text-muted">Aucun dépôt suivi. Ajoute le premier ci-dessous.</p>
+            <p className="pb-3 text-sm text-muted">{m.settings.repos.empty}</p>
           ) : (
             <>
               <RepoListHeader />
@@ -52,12 +56,10 @@ export function SettingsView({ notice, repos, contributors, authors, rules }: Se
       </Card>
 
       <div id="identites">
-        <Card title="Auteurs suivis">
+        <Card title={m.settings.authors.title}>
           <div>
             {contributors.length === 0 ? (
-              <p className="pb-3 text-sm text-muted">
-                Aucun auteur suivi. Synchronise, puis choisis qui suivre ci-dessous.
-              </p>
+              <p className="pb-3 text-sm text-muted">{m.settings.authors.empty}</p>
             ) : (
               <>
                 <ContributorListHeader />
@@ -74,10 +76,14 @@ export function SettingsView({ notice, repos, contributors, authors, rules }: Se
       </div>
 
       <form action={saveSettings}>
-        <Card title="Calcul des sessions">
+        <Card title={m.settings.rules.title}>
           <RulesFields pre={rules.preMinutes} gap={rules.gapMinutes} post={rules.postMinutes} />
         </Card>
       </form>
+
+      <Card title={m.settings.language.title}>
+        <LanguageField value={locale} />
+      </Card>
     </>
   );
 }

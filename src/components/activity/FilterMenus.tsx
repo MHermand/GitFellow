@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useOptimistic, useRef, useState, useTransition } from "react";
 import { RepoIcon, UsersIcon } from "@/components/icons";
+import { useI18n } from "@/i18n/client";
 import { activityHref, isSelected, toggleId, type ActivityParams } from "@/lib/activity";
 import type { ChipItem } from "@/lib/activity-view";
 
@@ -87,7 +88,8 @@ function CheckList({
   selection: string[] | null;
   onToggle: (id: string) => void;
 }) {
-  if (items.length === 0) return <p className="px-2 pb-1 text-sm text-muted">Rien à sélectionner.</p>;
+  const { m } = useI18n();
+  if (items.length === 0) return <p className="px-2 pb-1 text-sm text-muted">{m.filters.empty}</p>;
   return (
     <ul className="flex max-h-64 flex-col overflow-y-auto">
       {items.map((item) => (
@@ -124,6 +126,7 @@ export function FilterMenus({
   /** Page à recharger quand un filtre change (la fiche d'un contributeur, par exemple). */
   base?: string;
 }) {
+  const { m } = useI18n();
   const router = useRouter();
   // Les cases reflètent immédiatement le choix, le temps que la page se recharge avec la nouvelle URL.
   const [shown, applyPatch] = useOptimistic(params, (state: ActivityParams, patch: Partial<ActivityParams>) => ({ ...state, ...patch }));
@@ -138,10 +141,10 @@ export function FilterMenus({
 
   return (
     <>
-      <IconMenu icon={<UsersIcon />} label="Personnes" active={shown.people !== null} hue={hue}>
+      <IconMenu icon={<UsersIcon />} label={m.filters.people} active={shown.people !== null} hue={hue}>
         <CheckList items={people} selection={shown.people} onToggle={(id) => go({ people: toggleId(shown.people, peopleIds, id) })} />
       </IconMenu>
-      <IconMenu icon={<RepoIcon />} label="Dépôts" active={shown.repos !== null} hue={hue}>
+      <IconMenu icon={<RepoIcon />} label={m.filters.repos} active={shown.repos !== null} hue={hue}>
         <CheckList items={repos} selection={shown.repos} onToggle={(id) => go({ repos: toggleId(shown.repos, repoIds, id) })} />
       </IconMenu>
     </>

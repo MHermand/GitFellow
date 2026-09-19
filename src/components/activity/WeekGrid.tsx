@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/i18n/client";
 import { weekdayIndex } from "@/lib/calendar";
 import type { BlockView } from "@/lib/activity-view";
 import { gridBackground, hourLabels, SessionBlock } from "./blocks";
@@ -7,7 +8,6 @@ import { CALENDAR_BOX } from "./frame";
 import { GRID_TOP_PAD, useHourScale } from "./scrollers";
 
 const HEADER_PX = 44;
-const DAY_NAMES = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 const COLUMNS = "grid-cols-[48px_repeat(7,minmax(0,1fr))]";
 
 export function WeekGrid({
@@ -24,6 +24,7 @@ export function WeekGrid({
   /** Teinte de la page : le repère du jour la porte comme le reste. */
   hue: string;
 }) {
+  const { m } = useI18n();
   const { ref, hourPx } = useHourScale(HEADER_PX, 12, 8, 44);
   const gridHeight = 24 * hourPx;
   return (
@@ -37,7 +38,7 @@ export function WeekGrid({
               const isToday = day === today;
               return (
                 <div key={day} className="flex items-center gap-1.5 border-b border-l border-line/60 border-b-line px-2">
-                  <span className="text-[11px] tracking-[0.04em] text-ink-2 uppercase">{DAY_NAMES[weekdayIndex(day, tz)]}</span>
+                  <span className="text-[11px] tracking-[0.04em] text-ink-2 uppercase">{m.dates.weekdaysShort[weekdayIndex(day, tz)]}</span>
                   <span
                     className="tnum inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-semibold tracking-tight"
                     style={isToday ? { background: hue, color: "#fff" } : undefined}

@@ -5,6 +5,7 @@ import { addRepo, deleteRepo, setRepoTrackedSince } from "@/actions/settings";
 import { runSyncOne } from "@/actions/sync";
 import { CalendarIcon, PlusIcon, RefreshIcon, TrashIcon } from "@/components/icons";
 import { inputBase } from "@/components/ui";
+import { useI18n } from "@/i18n/client";
 
 export interface RepoItem {
   id: string;
@@ -33,6 +34,7 @@ const iconDanger =
 
 /** Ajout d'un dépôt, sous la liste, sur les colonnes « synchroniser » et « début du suivi ». */
 export function AddRepoForm() {
+  const { m } = useI18n();
   return (
     <form action={addRepo} className="flex items-center gap-x-3 border-t border-line pt-3 max-sm:flex-wrap">
       <span className={`${NAME_COL} max-sm:hidden`} />
@@ -40,11 +42,11 @@ export function AddRepoForm() {
       <input
         name="repo"
         required
-        placeholder="owner/nom ou URL GitHub"
-        aria-label="Ajouter un dépôt"
+        placeholder={m.settings.repos.addPlaceholder}
+        aria-label={m.settings.repos.add}
         className={`${inputBase} h-9 px-3 placeholder:text-xs ${ADD_COL} max-sm:w-full`}
       />
-      <button type="submit" aria-label="Ajouter le dépôt" title="Ajouter le dépôt" className={iconButton}>
+      <button type="submit" aria-label={m.settings.repos.addTitle} title={m.settings.repos.addTitle} className={iconButton}>
         <PlusIcon />
       </button>
     </form>
@@ -53,12 +55,13 @@ export function AddRepoForm() {
 
 /** En-tête de colonne : la date que porte chaque ligne. */
 export function RepoListHeader() {
+  const { m } = useI18n();
   return (
     <div className="flex items-center gap-x-3 pb-2 text-[11px] font-semibold tracking-wide text-muted uppercase max-sm:hidden">
       <span className={NAME_COL} />
       <span className="flex-1" />
       <span className={ICON_COL} />
-      <span className={DATE_COL}>Début du suivi</span>
+      <span className={DATE_COL}>{m.settings.repos.trackedSince}</span>
       <span className={ICON_COL} />
     </div>
   );
@@ -68,6 +71,7 @@ export function RepoListHeader() {
 export function RepoRow({ repo }: { repo: RepoItem }) {
   const label = `${repo.owner}/${repo.name}`;
   const [syncing, startSync] = useTransition();
+  const { m, t } = useI18n();
 
   return (
     <form
@@ -86,8 +90,8 @@ export function RepoRow({ repo }: { repo: RepoItem }) {
         type="button"
         onClick={() => startSync(async () => void (await runSyncOne(repo.id)))}
         disabled={syncing}
-        aria-label={`Synchroniser ${label}`}
-        title="Synchroniser ce dépôt seulement"
+        aria-label={t(m.settings.repos.syncOne, { repo: label })}
+        title={m.settings.repos.syncOneTitle}
         className={iconButton}
       >
         <RefreshIcon className={syncing ? "animate-spin" : undefined} />
@@ -102,8 +106,8 @@ export function RepoRow({ repo }: { repo: RepoItem }) {
             // Enregistrer à chaque frappe refermerait le sélecteur de date en pleine navigation.
             if (e.currentTarget.value !== e.currentTarget.defaultValue) e.currentTarget.form?.requestSubmit();
           }}
-          aria-label={`Début du suivi de ${label}`}
-          title="Vide : tout l'historique du dépôt"
+          aria-label={t(m.settings.repos.dateFor, { repo: label })}
+          title={m.settings.repos.dateHint}
           className={`${inputBase} relative h-9 w-full px-3 pr-9 ${PICKER}`}
         />
         <CalendarIcon className="pointer-events-none absolute top-1/2 right-[9px] size-4 -translate-y-1/2 text-ink-2" />
@@ -111,8 +115,8 @@ export function RepoRow({ repo }: { repo: RepoItem }) {
       <button
         type="submit"
         formAction={deleteRepo}
-        aria-label={`Retirer ${label}`}
-        title="Retirer le dépôt et ses commits"
+        aria-label={t(m.settings.repos.remove, { repo: label })}
+        title={m.settings.repos.removeTitle}
         className={iconDanger}
       >
         <TrashIcon />

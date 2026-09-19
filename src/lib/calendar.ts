@@ -5,7 +5,8 @@
  */
 import { TZDate } from "@date-fns/tz";
 import { addDays, addMonths, format, startOfMonth } from "date-fns";
-import { fr } from "date-fns/locale";
+import { DEFAULT_LOCALE, fill, messages, type Locale } from "@/i18n";
+import { dateFnsLocale } from "./locale-dates";
 import { sessionMinutes, type Session } from "./sessions";
 import { dayKey, weekEnd, weekLabel, weekOf, weekStart, type WeekKey } from "./weeks";
 
@@ -62,9 +63,11 @@ export interface Period {
   days: string[];
 }
 
-export function periodFor(view: View, anchorDay: string, tz: string): Period {
+export function periodFor(view: View, anchorDay: string, tz: string, locale: Locale = DEFAULT_LOCALE): Period {
   const anchor = dayStart(anchorDay, tz);
   const zoned = new TZDate(anchor, tz);
+  const { dates } = messages(locale);
+  const dateLocale = dateFnsLocale(locale);
 
   if (view === "jour") {
     const end = new Date(addDays(zoned, 1).getTime());
@@ -74,7 +77,7 @@ export function periodFor(view: View, anchorDay: string, tz: string): Period {
       start: anchor,
       end,
       week: weekOf(anchor, tz),
-      label: capitalize(format(zoned, "EEEE d MMMM yyyy", { locale: fr })),
+      label: capitalize(format(zoned, dates.dayLong, { locale: dateLocale })),
       prevDay: shiftDay(anchorDay, -1, tz),
       nextDay: shiftDay(anchorDay, 1, tz),
       days: [anchorDay],
@@ -93,7 +96,7 @@ export function periodFor(view: View, anchorDay: string, tz: string): Period {
       start,
       end,
       week: weekOf(dayStart(lastDay, tz), tz),
-      label: capitalize(format(zoned, "LLLL yyyy", { locale: fr })),
+      label: capitalize(format(zoned, dates.monthLong, { locale: dateLocale })),
       prevDay: dayKey(new Date(startOfMonth(addMonths(zoned, -1)).getTime()), tz),
       nextDay: dayKey(end, tz),
       days: listDays(dayKey(start, tz), lastDay, tz),
@@ -110,7 +113,7 @@ export function periodFor(view: View, anchorDay: string, tz: string): Period {
     start,
     end,
     week,
-    label: `Semaine ${week.week} · ${weekLabel(week, tz)}`,
+    label: `${fill(dates.week, { n: week.week })} · ${weekLabel(week, tz, locale)}`,
     prevDay: shiftDay(firstDay, -7, tz),
     nextDay: shiftDay(firstDay, 7, tz),
     days: listDays(firstDay, shiftDay(firstDay, 6, tz), tz),

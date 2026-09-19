@@ -4,6 +4,7 @@ import { useOptimistic, useState, useTransition } from "react";
 import { deleteContributor, saveContributor, trackAuthor } from "@/actions/settings";
 import { ChevronDownIcon, EditIcon, TrashIcon } from "@/components/icons";
 import { inputBase } from "@/components/ui";
+import { useI18n } from "@/i18n/client";
 import { TARGET_UNITS, type TargetUnit } from "@/lib/target";
 import { Menu, MenuCount, menuItem } from "./Menu";
 
@@ -53,6 +54,7 @@ const iconDanger =
 
 /** Auteurs de commits qui ne sont rattachés à personne : un clic les met sous suivi. */
 export function AuthorPicker({ authors }: { authors: AuthorItem[] }) {
+  const { m } = useI18n();
   const [query, setQuery] = useState("");
   const [shown, hide] = useOptimistic(authors, (state: AuthorItem[], key: string) => state.filter((a) => a.key !== key));
   const [, startTransition] = useTransition();
@@ -69,12 +71,12 @@ export function AuthorPicker({ authors }: { authors: AuthorItem[] }) {
   const list = shown.filter((a) => `${a.label} ${a.email}`.toLowerCase().includes(needle));
 
   return (
-    <Menu label="Ajouter des auteurs" width={ADD_COL}>
+    <Menu label={m.settings.authors.pick} width={ADD_COL}>
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Rechercher un auteur…"
-        aria-label="Rechercher un auteur"
+        placeholder={m.settings.authors.search}
+        aria-label={m.settings.authors.search}
         className={`${inputBase} h-9 w-full px-3`}
       />
       <ul className="mt-1 max-h-64 overflow-y-auto">
@@ -87,7 +89,7 @@ export function AuthorPicker({ authors }: { authors: AuthorItem[] }) {
             </button>
           </li>
         ))}
-        {list.length === 0 ? <li className="px-2 py-2 text-sm text-muted">Aucun auteur.</li> : null}
+        {list.length === 0 ? <li className="px-2 py-2 text-sm text-muted">{m.settings.authors.none}</li> : null}
       </ul>
     </Menu>
   );
@@ -95,12 +97,13 @@ export function AuthorPicker({ authors }: { authors: AuthorItem[] }) {
 
 /** En-tête de colonne : ce que porte chaque ligne à droite. */
 export function ContributorListHeader() {
+  const { m } = useI18n();
   return (
     <div className="flex items-center gap-x-3 pb-2 text-[11px] font-semibold tracking-wide text-muted uppercase max-sm:hidden">
       <span className={ICON_COL} />
       <span className={NAME_COL} />
       <span className="flex-1" />
-      <span className={`${OBJECTIVE_COL} text-right`}>Objectif horaire</span>
+      <span className={`${OBJECTIVE_COL} text-right`}>{m.settings.authors.target}</span>
       <span className={ICON_COL} />
     </div>
   );
@@ -118,6 +121,8 @@ function submitIfChanged(el: HTMLInputElement) {
 /** Ligne d'un contributeur : nom, identité principale, objectif facultatif, édition dépliable. */
 export function ContributorRow({ contributor }: { contributor: ContributorItem }) {
   const [editing, setEditing] = useState(false);
+  const { m, t } = useI18n();
+  const a = m.settings.authors;
 
   return (
     <form action={saveContributor} className="border-t border-line py-2.5">
@@ -127,8 +132,8 @@ export function ContributorRow({ contributor }: { contributor: ContributorItem }
           type="button"
           onClick={() => setEditing((v) => !v)}
           aria-expanded={editing}
-          aria-label={`Modifier ${contributor.displayName}`}
-          title="Nom affiché et identités rattachées"
+          aria-label={t(a.edit, { name: contributor.displayName })}
+          title={a.editTitle}
           className={iconButton}
         >
           <EditIcon />
@@ -147,8 +152,8 @@ export function ContributorRow({ contributor }: { contributor: ContributorItem }
             placeholder="—"
             defaultValue={contributor.targetHours}
             onBlur={(e) => submitIfChanged(e.currentTarget)}
-            aria-label={`Objectif de ${contributor.displayName}, en heures`}
-            title="Heures visées"
+            aria-label={t(a.targetFor, { name: contributor.displayName })}
+            title={a.targetTitle}
             className={`${inputBase} ${ICON_COL} h-9 px-0 text-center tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
           />
           {/* Chevron dessiné à la main : il se cale alors exactement sur l'icône du champ date au-dessus. */}
@@ -157,12 +162,12 @@ export function ContributorRow({ contributor }: { contributor: ContributorItem }
               name="target_unit"
               defaultValue={contributor.targetUnit}
               onChange={(e) => submitForm(e.currentTarget)}
-              aria-label={`Unité de l'objectif de ${contributor.displayName}`}
+              aria-label={t(a.unitFor, { name: contributor.displayName })}
               className={`${inputBase} h-9 w-full appearance-none px-3 pr-9`}
             >
               {TARGET_UNITS.map((unit) => (
-                <option key={unit.value} value={unit.value}>
-                  {`/ ${unit.label}`}
+                <option key={unit} value={unit}>
+                  {a.units[unit]}
                 </option>
               ))}
             </select>
@@ -172,8 +177,8 @@ export function ContributorRow({ contributor }: { contributor: ContributorItem }
         <button
           type="submit"
           formAction={deleteContributor}
-          aria-label={`Supprimer ${contributor.displayName}`}
-          title="Supprimer ce contributeur"
+          aria-label={t(a.delete, { name: contributor.displayName })}
+          title={a.deleteTitle}
           className={iconDanger}
         >
           <TrashIcon />
@@ -182,14 +187,11 @@ export function ContributorRow({ contributor }: { contributor: ContributorItem }
 
       {/* Toujours rendus : le nom et les identités doivent partir avec le formulaire même repliés. */}
       <div className={`grid gap-2 sm:grid-cols-4 ${editing ? "pt-3" : "hidden"}`}>
-        <EditField id={contributor.id} name="display_name" label="Nom affiché" value={contributor.displayName} placeholder="Félix" />
-        <EditField id={contributor.id} name="github_logins" label="Logins GitHub" value={contributor.logins} placeholder="Felixooos" />
-        <EditField id={contributor.id} name="author_emails" label="E-mails" value={contributor.emails} placeholder="felix@exemple.fr" />
-        <EditField id={contributor.id} name="author_names" label="Noms d'auteur" value={contributor.names} placeholder="Felix H" />
-        <p className="text-xs text-muted sm:col-span-4">
-          Plusieurs valeurs séparées par des virgules. Les logins servent aussi à rattacher les commits d&apos;un agent via
-          l&apos;auteur de la pull request.
-        </p>
+        <EditField id={contributor.id} name="display_name" label={a.displayName} value={contributor.displayName} placeholder="Félix" />
+        <EditField id={contributor.id} name="github_logins" label={a.logins} value={contributor.logins} placeholder="Felixooos" />
+        <EditField id={contributor.id} name="author_emails" label={a.emails} value={contributor.emails} placeholder="felix@example.com" />
+        <EditField id={contributor.id} name="author_names" label={a.names} value={contributor.names} placeholder="Felix H" />
+        <p className="text-xs text-muted sm:col-span-4">{a.hint}</p>
       </div>
     </form>
   );

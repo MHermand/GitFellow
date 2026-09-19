@@ -39,7 +39,7 @@ describe("périodes", () => {
   });
 
   it("semaine : lundi → lundi suivant, libellé et navigation", () => {
-    const p = periodFor("semaine", "2026-09-16", tz);
+    const p = periodFor("semaine", "2026-09-16", tz, "fr");
     expect(p.start.toISOString()).toBe(at("2026-09-14T00:00:00+02:00"));
     expect(p.end.toISOString()).toBe(at("2026-09-21T00:00:00+02:00"));
     expect(p.label).toBe("Semaine 38 · 14 sept. → 20 sept. 2026");
@@ -50,10 +50,10 @@ describe("périodes", () => {
   });
 
   it("jour et mois", () => {
-    const d = periodFor("jour", "2026-09-07", tz);
+    const d = periodFor("jour", "2026-09-07", tz, "fr");
     expect(d.label).toBe("Lundi 7 septembre 2026");
     expect(d.end.toISOString()).toBe(at("2026-09-08T00:00:00+02:00"));
-    const m = periodFor("mois", "2026-09-18", tz);
+    const m = periodFor("mois", "2026-09-18", tz, "fr");
     expect(m.label).toBe("Septembre 2026");
     expect(m.start.toISOString()).toBe(at("2026-09-01T00:00:00+02:00"));
     expect(m.end.toISOString()).toBe(at("2026-10-01T00:00:00+02:00"));

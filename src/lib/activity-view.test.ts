@@ -29,12 +29,13 @@ const commits = [
 
 function build(raw: Record<string, string>) {
   const params = parseActivityParams(raw, tz, now);
-  const period = periodFor(params.view, params.day, tz);
+  const period = periodFor(params.view, params.day, tz, "fr");
   const reference = thisWeek;
   const { reports } = buildReport(commits, [felix, max], { preMinutes: 30, gapMinutes: 120, postMinutes: 30, timezone: tz });
   return buildActivityView({
     params, period, reports, contributors: [felix, max], repoLabels: ["a/x", "a/y"], tz, today, thisWeek,
     trendWeeks: weeksRange(addWeeksToKey(reference, -1, tz), 7, tz),
+    locale: "fr",
   });
 }
 

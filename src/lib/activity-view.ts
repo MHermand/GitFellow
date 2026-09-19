@@ -5,6 +5,7 @@
  * Toutes les cartes (période, dépôts, rythme, tendance) portent sur les personnes sélectionnées
  * dans la barre de filtres ; le rythme porte en plus sur la période affichée.
  */
+import { count, fill, messages, type Locale } from "@/i18n";
 import { activityHref, type ActivityParams } from "./activity";
 import {
   fmtClock,
@@ -165,10 +166,8 @@ export interface ActivityViewInput {
   today: string;
   thisWeek: WeekKey;
   trendWeeks: WeekKey[];
+  locale: Locale;
 }
-
-const WEEKDAY_LETTERS = ["L", "M", "M", "J", "V", "S", "D"];
-const WEEKDAY_NAMES = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
 const shortRepo = (label: string) => label.split("/")[1] ?? label;
 
@@ -181,12 +180,8 @@ function inRange(sessions: Session[], start: Date, end: Date): Session[] {
 }
 
 /** Part d'une valeur dans son total, quand ce total a un sens. */
-function shareOf(part: number, whole: number | null | undefined): string | undefined {
-  return whole && whole > 0 ? fmtPercent(part / whole) : undefined;
-}
-
-function plural(n: number, singular: string, pluralForm = `${singular}s`): string {
-  return `${n} ${n > 1 ? pluralForm : singular}`;
+function shareOf(part: number, whole: number | null | undefined, locale: Locale): string | undefined {
+  return whole && whole > 0 ? fmtPercent(part / whole, locale) : undefined;
 }
 
 /** Fiche d'un contributeur, ouverte sur la période affichée, filtres conservés. */
@@ -212,7 +207,9 @@ export function filterChips(contributors: ContributorRow[], repoLabels: string[]
 }
 
 export function buildActivityView(input: ActivityViewInput): ActivityView {
-  const { params, period, reports, contributors, repoLabels, tz, today, thisWeek, trendWeeks } = input;
+  const { params, period, reports, contributors, repoLabels, tz, today, thisWeek, trendWeeks, locale } = input;
+  const m = messages(locale);
+  const partOf = (part: number, whole: number | null | undefined) => shareOf(part, whole, locale);
   const personIndex = new Map(contributors.map((c, i) => [c.id, i]));
   const personSwatch = (id: string) => swatch(personIndex.get(id) ?? 0);
 
@@ -250,7 +247,16 @@ export function buildActivityView(input: ActivityViewInput): ActivityView {
           secondary: repoNames,
           commits: session.events.length,
           href: detailHref(c.id, params, dayKey(session.start, tz), today),
-          title: `${c.displayName} · ${dayLabel(seg.day, tz)} · ${fmtInTz(session.start, tz, "HH:mm")} → ${fmtInTz(session.end, tz, "HH:mm")} · ${fmtMinutes(sessionMinutes(session))} conventionnel, ${fmtMinutes(rawMinutes(session))} brut · ${plural(session.events.length, "commit")} · ${repoNames}`,
+          title: fill(m.activity.blockTitle, {
+            name: c.displayName,
+            day: dayLabel(seg.day, tz, locale),
+            start: fmtInTz(session.start, tz, "HH:mm"),
+            end: fmtInTz(session.end, tz, "HH:mm"),
+            conventional: fmtMinutes(sessionMinutes(session)),
+            raw: fmtMinutes(rawMinutes(session)),
+            commits: count(locale, m.common.commits, session.events.length),
+            repos: repoNames,
+          }),
           lines: session.events.map((e) => ({ time: fmtInTz(e.at, tz, "HH:mm"), repo: shortRepo(e.repo), message: e.message || e.sha.slice(0, 7) })),
         });
       }
@@ -309,13 +315,13 @@ export function buildActivityView(input: ActivityViewInput): ActivityView {
   const periodWorkingDays = elapsedWorkingDays(period.days, today, tz);
   if (params.view === "mois") {
     const periodTarget = dailyTarget * periodWorkingDays;
-    suffix = periodTarget > 0 ? `/ ${fmtHours(periodTarget)}` : "sans seuil";
+    suffix = periodTarget > 0 ? fill(m.activity.target, { hours: fmtHours(periodTarget, locale) }) : m.activity.noTarget;
     fillBase = periodTarget * 60;
   } else if (params.view === "semaine") {
-    suffix = weekTarget > 0 ? `/ ${fmtHours(weekTarget)}` : "sans seuil";
+    suffix = weekTarget > 0 ? fill(m.activity.target, { hours: fmtHours(weekTarget, locale) }) : m.activity.noTarget;
     fillBase = weekTarget * 60;
   }
-  const fill = fillBase > 0 ? Math.min(1, group.minutes / fillBase) : group.minutes > 0 ? 1 : 0;
+  const fillRatio = fillBase > 0 ? Math.min(1, group.minutes / fillBase) : group.minutes > 0 ? 1 : 0;
 
   const ownTotals = new Map(selected.map((r) => [r.contributor.id, totals(periodSessions.get(r.contributor.id) ?? [], tz)]));
   // Les parts n'ont de sens qu'à plusieurs : seules, elles vaudraient toujours 100 %.
@@ -326,12 +332,12 @@ export function buildActivityView(input: ActivityViewInput): ActivityView {
     const part = (whole: number) => (several ? whole : null);
     // Mêmes indicateurs, dans le même ordre, d'une vue à l'autre.
     const rows: TipRow[] = [
-      { label: "Temps", value: fmtMinutes(own.minutes), share: shareOf(own.minutes, part(group.minutes)) },
-      { label: "Commits", value: String(own.commits), share: shareOf(own.commits, part(group.commits)) },
-      { label: "Sessions", value: String(own.sessions), share: shareOf(own.sessions, part(group.sessions)) },
+      { label: m.activity.tip.time, value: fmtMinutes(own.minutes), share: partOf(own.minutes, part(group.minutes)) },
+      { label: m.activity.tip.commits, value: String(own.commits), share: partOf(own.commits, part(group.commits)) },
+      { label: m.activity.tip.sessions, value: String(own.sessions), share: partOf(own.sessions, part(group.sessions)) },
     ];
     if (params.view !== "jour") {
-      rows.push({ label: "Jours actifs", value: String(own.days.size), share: shareOf(own.days.size, part(periodWorkingDays)) });
+      rows.push({ label: m.activity.tip.activeDays, value: String(own.days.size), share: partOf(own.days.size, part(periodWorkingDays)) });
     }
     return {
       id: c.id,
@@ -339,7 +345,7 @@ export function buildActivityView(input: ActivityViewInput): ActivityView {
       dot: personSwatch(c.id).dot,
       minutes: own.minutes,
       shown: fmtMinutes(own.minutes),
-      share: group.minutes > 0 ? (fill * own.minutes) / group.minutes : 0,
+      share: group.minutes > 0 ? (fillRatio * own.minutes) / group.minutes : 0,
       rows,
     };
   });
@@ -351,7 +357,7 @@ export function buildActivityView(input: ActivityViewInput): ActivityView {
     people: personDetails,
   };
 
-  const periodTitle = params.view === "jour" ? "Ce jour" : params.view === "mois" ? period.label : "Cette semaine";
+  const periodTitle = params.view === "jour" ? m.activity.thisDay : params.view === "mois" ? period.label : m.activity.thisWeek;
 
   // ---- Par dépôt (au prorata des commits de chaque session)
   const totalShares = repoBreakdown(allPeriodSessions);
@@ -370,8 +376,8 @@ export function buildActivityView(input: ActivityViewInput): ActivityView {
       commits: s.commits,
       share,
       rows: [
-        { label: "Temps", value: fmtMinutes(s.minutes), share: shareOf(s.minutes, severalRepos ? grand : null) },
-        { label: "Commits", value: String(s.commits), share: shareOf(s.commits, severalRepos ? grandCommits : null) },
+        { label: m.activity.tip.time, value: fmtMinutes(s.minutes), share: partOf(s.minutes, severalRepos ? grand : null) },
+        { label: m.activity.tip.commits, value: String(s.commits), share: partOf(s.commits, severalRepos ? grandCommits : null) },
       ],
     };
   });
@@ -383,13 +389,13 @@ export function buildActivityView(input: ActivityViewInput): ActivityView {
     const anchorRow = params.view === "jour" ? weekdayIndex(params.day, tz) : -1;
     // La matrice garde les sept lignes quelle que soit la période : seule la donnée change.
     const rowTitle = (index: number) => {
-      if (params.view === "mois") return `${WEEKDAY_NAMES[index]}s du mois`;
-      if (params.view === "semaine") return capitalize(dayLabel(period.days[index], tz));
-      return index === anchorRow ? capitalize(dayLabel(params.day, tz)) : WEEKDAY_NAMES[index];
+      if (params.view === "mois") return fill(m.activity.weekdaysOfMonth, { weekday: m.dates.weekdays[index] });
+      if (params.view === "semaine") return capitalize(dayLabel(period.days[index], tz, locale));
+      return index === anchorRow ? capitalize(dayLabel(params.day, tz, locale)) : m.dates.weekdays[index];
     };
     rhythmView = {
       rows: [0, 1, 2, 3, 4, 5, 6].map((index) => ({
-        letter: WEEKDAY_LETTERS[index],
+        letter: m.dates.weekdayLetters[index],
         title: rowTitle(index),
         cells: cells[index].map((cell) => ({
           level: max > 0 && cell.minutes > 0 ? Math.min(5, 1 + Math.floor((cell.minutes / max) * 4.999)) : 0,
@@ -414,15 +420,15 @@ export function buildActivityView(input: ActivityViewInput): ActivityView {
   let sources: TrendSource[] = [];
   if (selected.length > 0 && params.view === "mois") {
     sources = trendWeeks.map((w, i) => ({
-      label: `S${String(w.week).padStart(2, "0")}`,
-      title: `Semaine ${w.week} · ${weekShortLabel(w, tz)}`,
+      label: fill(m.dates.weekShort, { n: String(w.week).padStart(2, "0") }),
+      title: `${fill(m.dates.week, { n: w.week })} · ${weekShortLabel(w, tz, locale)}`,
       current: i === trendWeeks.length - 1,
       sessions: selected.flatMap((r) => sessionsInWeek(r.sessions, w, tz)),
-      days: periodFor("semaine", dayKey(weekStart(w, tz), tz), tz).days,
+      days: periodFor("semaine", dayKey(weekStart(w, tz), tz), tz, locale).days,
     }));
   } else if (selected.length > 0) {
     // Les sept jours de la semaine affichée (ou de celle du jour affiché).
-    const weekDays = params.view === "semaine" ? period.days : periodFor("semaine", params.day, tz).days;
+    const weekDays = params.view === "semaine" ? period.days : periodFor("semaine", params.day, tz, locale).days;
     const byDay = new Map<string, Session[]>();
     for (const r of selected) {
       for (const session of sessionsInWeek(r.sessions, period.week, tz)) {
@@ -431,8 +437,8 @@ export function buildActivityView(input: ActivityViewInput): ActivityView {
       }
     }
     sources = weekDays.map((day) => ({
-      label: `${WEEKDAY_LETTERS[weekdayIndex(day, tz)]} ${Number(day.split("-")[2])}`,
-      title: capitalize(dayLabel(day, tz)),
+      label: `${m.dates.weekdayLetters[weekdayIndex(day, tz)]} ${Number(day.split("-")[2])}`,
+      title: capitalize(dayLabel(day, tz, locale)),
       current: params.view === "jour" ? day === params.day : day === today,
       sessions: byDay.get(day) ?? [],
       days: [day],
@@ -451,10 +457,10 @@ export function buildActivityView(input: ActivityViewInput): ActivityView {
     shown: fmtMinutes(stat.minutes),
     current: source.current,
     rows: [
-      { label: "Temps", value: fmtMinutes(stat.minutes), share: shareOf(stat.minutes, barTotals.minutes) },
-      { label: "Commits", value: String(stat.commits), share: shareOf(stat.commits, barTotals.commits) },
-      { label: "Sessions", value: String(stat.sessions), share: shareOf(stat.sessions, barTotals.sessions) },
-      { label: "Jours actifs", value: String(stat.days.size), share: shareOf(stat.days.size, elapsedWorkingDays(source.days, today, tz)) },
+      { label: m.activity.tip.time, value: fmtMinutes(stat.minutes), share: partOf(stat.minutes, barTotals.minutes) },
+      { label: m.activity.tip.commits, value: String(stat.commits), share: partOf(stat.commits, barTotals.commits) },
+      { label: m.activity.tip.sessions, value: String(stat.sessions), share: partOf(stat.sessions, barTotals.sessions) },
+      { label: m.activity.tip.activeDays, value: String(stat.days.size), share: partOf(stat.days.size, elapsedWorkingDays(source.days, today, tz)) },
     ],
   }));
 

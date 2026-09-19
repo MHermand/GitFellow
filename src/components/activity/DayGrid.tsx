@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/i18n/client";
 import { fmtMinutes } from "@/lib/format";
 import type { DayColumn } from "@/lib/activity-view";
 import { DayBlock, gridBackground, hourLabels } from "./blocks";
@@ -11,6 +12,7 @@ const HEADER_PX = 44;
 export type { DayColumn };
 
 export function DayGrid({ columns }: { columns: DayColumn[] }) {
+  const { m, n } = useI18n();
   const { ref, hourPx } = useHourScale(HEADER_PX, 12, 8, 56);
   const gridHeight = 24 * hourPx;
   const template = `48px repeat(${Math.max(1, columns.length)}, minmax(0, 1fr))`;
@@ -28,12 +30,12 @@ export function DayGrid({ columns }: { columns: DayColumn[] }) {
                   <span className="tnum text-[13px] text-ink-2">{col.minutes ? fmtMinutes(col.minutes) : "—"}</span>
                 </div>
                 <span className="text-[11px] text-muted">
-                  {col.sessions} session{col.sessions > 1 ? "s" : ""} · {col.commits} commit{col.commits > 1 ? "s" : ""}
+                  {n(m.common.sessions, col.sessions)} · {n(m.common.commits, col.commits)}
                 </span>
               </div>
             ))}
             {columns.length === 0 ? (
-              <div className="flex items-center border-b border-line px-3 text-sm text-muted">Aucune personne sélectionnée</div>
+              <div className="flex items-center border-b border-line px-3 text-sm text-muted">{m.activity.noColumn}</div>
             ) : null}
           </div>
           <div className="grid" style={{ gridTemplateColumns: template, paddingTop: GRID_TOP_PAD }}>
