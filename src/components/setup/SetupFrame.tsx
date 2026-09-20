@@ -27,8 +27,9 @@ export function SetupFrame({ step, children }: { step: SetupStep; children: Reac
         />
         <div className="relative flex flex-col gap-5">
           <img src="/gitfellow-logo.svg" alt="" width={64} height={64} style={{ width: 64, height: 64 }} />
-          {/* 38 px est le plafond ici : au-delà, l'anglais casse en trois lignes dans les 384 px du panneau. */}
-          <h1 className="text-justify text-[28px] leading-[1.1] font-bold tracking-[-0.035em] md:text-[38px]">
+          {/* Aligné à gauche : justifié, une ligne de trois mots à 38 px écarte les blancs du simple au triple.
+              38 px est le plafond ici — au-delà, l'anglais casse en trois lignes dans les 384 px du panneau. */}
+          <h1 className="text-[28px] leading-[1.1] font-bold tracking-[-0.035em] md:text-[38px]">
             {m.setup.headline} <span className="text-accent-dark">{m.setup.headlineBrand}</span>
           </h1>
           {/* Un peu d'air sous le titre : la phrase se lit comme une suite, pas comme un sous-titre collé. */}
