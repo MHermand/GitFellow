@@ -8,7 +8,7 @@
  * (mettre http://127.0.0.1:4747/).
  * GITFELLOW_GITHUB_CLIENT_ID, lu au lancement, permet d'en essayer un autre sans toucher ici.
  */
-const BUILT_IN_CLIENT_ID = "";
+const BUILT_IN_CLIENT_ID = "Ov23liBtmk5eKR1tvpDB";
 
 export function githubClientId(): string {
   return process.env.GITFELLOW_GITHUB_CLIENT_ID?.trim() || BUILT_IN_CLIENT_ID;
