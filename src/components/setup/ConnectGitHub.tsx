@@ -101,7 +101,8 @@ export function ConnectGitHub({ deviceFlow }: { deviceFlow: boolean }) {
         <>
           <div>
             <h2 className="text-xl font-bold tracking-tight">{g.connectTitle}</h2>
-            <p className="mt-1.5 text-sm text-ink-2">{g.connectIntro}</p>
+            {/* Justifiée sur la largeur du bouton, comme la note qui le suit. */}
+            <p className="mt-1.5 text-justify text-sm text-ink-2">{g.connectIntro}</p>
           </div>
           {phase.error ? <Notice kind="error">{phase.error}</Notice> : null}
           <button type="button" onClick={start} disabled={starting} className={`${btnPrimary} h-11 w-full`}>
