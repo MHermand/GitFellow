@@ -3,7 +3,8 @@
  * (device flow). Il n'est pas secret. Vide, l'assistant ne propose que le jeton personnel.
  *
  * À créer une fois sur github.com/settings/developers → OAuth Apps → New OAuth App, en cochant
- * « Enable Device Flow » ; l'URL de callback n'est pas utilisée (mettre http://127.0.0.1).
+ * « Enable Device Flow » ; l'URL de callback n'est pas utilisée (mettre http://127.0.0.1:4747/).
+ * GITFELLOW_GITHUB_CLIENT_ID, lu au lancement, permet d'en essayer un autre sans toucher ici.
  */
 const BUILT_IN_CLIENT_ID = "";
 
