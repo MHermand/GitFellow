@@ -1,7 +1,8 @@
 /**
  * Captures d'écran du README, prises sur l'application lancée avec le GitHub simulé :
  *
- *   node scripts/pack.mjs --no-build   (ou npm run build, puis)
+ *   npm i -D playwright && npx playwright install chromium   (une fois)
+ *   node scripts/pack.mjs
  *   node scripts/screenshots.mjs        → docs/*.png
  *
  * Lance le lanceur du paquet (dist/bin/gitfellow.mjs) sur un port libre avec un dossier de données
@@ -11,7 +12,16 @@ import { spawn } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { chromium } from "playwright";
+
+// Playwright n'est pas une dépendance du projet : son installation télécharge un navigateur
+// de 150 Mo, inutile à qui veut seulement faire tourner GitFellow.
+let chromium;
+try {
+  ({ chromium } = await import("playwright"));
+} catch {
+  console.error("Ce script demande Playwright :\n  npm i -D playwright && npx playwright install chromium");
+  process.exit(1);
+}
 
 const PORT = 4760;
 const BASE = `http://127.0.0.1:${PORT}`;
