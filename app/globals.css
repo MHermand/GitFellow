@@ -13,6 +13,7 @@
   --accent: #4f46e5; /* primary · hsl(243.4 75.4% 58.6%) */
   --accent-fg: #463acb; /* accent-foreground · hsl(245 58% 51%) */
   --accent-soft: #eef2ff; /* accent · hsl(226 100% 96.7%) */
+  --accent-dark: #818cf8; /* le violet sur fond d'encre : 4f46e5 n'y tient pas (2,8 : 1) */
   --track: #f1f5f9; /* muted · hsl(210 40% 96.1%) */
   --danger: #e11d48; /* destructive · hsl(346.8 77.2% 49.8%) */
   --data: #2a78d6; /* teinte des données, première place du jeu catégoriel */
@@ -29,6 +30,7 @@
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-dark: var(--accent-dark);
   --color-track: var(--track);
   --color-danger: var(--danger);
   --color-data: var(--data);

@@ -16,8 +16,9 @@ export function SetupFrame({ step, children }: { step: SetupStep; children: Reac
   const guarantees = [m.setup.guarantees.local, m.setup.guarantees.readOnly, m.setup.guarantees.revocable];
 
   return (
-    <main className="flex min-h-screen flex-col md:grid md:grid-cols-[44%_1fr]">
-      <aside className="relative flex flex-col justify-between gap-10 overflow-hidden bg-ink px-8 py-10 text-white md:px-14 md:py-14">
+    // Le panneau garde une largeur de lecture : il ne s'étire pas avec l'écran.
+    <main className="flex min-h-screen flex-col md:grid md:grid-cols-[minmax(18rem,30rem)_1fr]">
+      <aside className="relative flex flex-col justify-between gap-10 overflow-hidden bg-ink px-8 py-10 text-white md:px-12 md:py-14">
         {/* Trame discrète : le fond sombre respire sans rien raconter. */}
         <div
           aria-hidden
@@ -26,13 +27,15 @@ export function SetupFrame({ step, children }: { step: SetupStep; children: Reac
         />
         <div className="relative flex flex-col gap-5">
           <img src="/gitfellow-logo.svg" alt="" width={56} height={56} style={{ width: 56, height: 56 }} />
-          <h1 className="text-[26px] leading-[1.15] font-bold tracking-[-0.03em] md:text-3xl">{m.setup.promise}</h1>
-          <p className="max-w-sm text-sm leading-relaxed text-muted">{m.setup.tagline}</p>
+          <h1 className="text-[26px] leading-[1.15] font-bold tracking-[-0.03em] md:text-3xl">
+            {m.setup.headline} <span className="text-accent-dark">{m.setup.headlineBrand}</span>
+          </h1>
+          <p className="text-sm leading-relaxed text-muted">{m.setup.tagline}</p>
         </div>
         <ul className="relative flex flex-col gap-3">
           {guarantees.map((text) => (
             <li key={text} className="flex items-start gap-2.5 text-sm leading-snug text-white/85">
-              <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-good" strokeWidth={2.4} />
+              <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-accent-dark" strokeWidth={2.4} />
               <span>{text}</span>
             </li>
           ))}
