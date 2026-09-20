@@ -52,6 +52,16 @@ try {
       // L'assistant, une seule fois : la connexion vaut pour les deux langues.
       await page.goto(`${BASE}/`);
       await shoot(page, "setup-1-github");
+      // Le code à saisir (le GitHub simulé en montre un sans jamais le confirmer).
+      const popup = page.context().waitForEvent("page", { timeout: 5000 }).catch(() => null);
+      await page.getByRole("button", { name: /sign in with github|se connecter avec github/i }).click();
+      await page.waitForSelector("code");
+      const opened = await popup;
+      if (opened) await opened.close();
+      await shoot(page, "setup-1-code");
+      await page.getByRole("button", { name: /cancel|annuler/i }).click();
+      // Le jeton, replié derrière un lien.
+      await page.getByRole("button", { name: /token|jeton/i }).click();
       await page.fill("input[name=token]", "ghp_" + "x".repeat(36));
       await page.click("form button[type=submit]");
       await page.waitForURL("**/setup?step=repos");
