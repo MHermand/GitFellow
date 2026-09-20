@@ -67,7 +67,7 @@ export function ConnectGitHub({ deviceFlow }: { deviceFlow: boolean }) {
 
   if (phase.kind === "code") {
     return (
-      <div className="flex flex-1 flex-col gap-5">
+      <div className="flex flex-col gap-5">
         <div>
           <h2 className="text-xl font-bold tracking-tight">{g.codeTitle}</h2>
           <p className="mt-1.5 text-sm text-ink-2">{g.codeIntro}</p>
@@ -86,7 +86,7 @@ export function ConnectGitHub({ deviceFlow }: { deviceFlow: boolean }) {
           <span className="inline-block h-2 w-2 shrink-0 animate-pulse rounded-full bg-accent" aria-hidden />
           {t(g.waitingFor, { minutes: Math.max(1, Math.round(phase.code.expiresIn / 60)) })}
         </p>
-        <div className="mt-auto border-t border-line pt-4">
+        <div className="border-t border-line pt-5">
           <button type="button" onClick={() => setPhase(IDLE)} className="text-sm text-ink-2 underline-offset-[3px] hover:text-ink hover:underline">
             {g.cancel}
           </button>
@@ -108,7 +108,8 @@ export function ConnectGitHub({ deviceFlow }: { deviceFlow: boolean }) {
             <GitHubIcon />
             {phase.error ? g.retry : g.device}
           </button>
-          <p className="text-xs leading-relaxed text-muted">{g.codeNote}</p>
+          {/* Justifiée sur la largeur du bouton : le bloc de texte a le même aplomb que lui. */}
+          <p className="w-full text-justify text-xs leading-relaxed text-muted">{g.codeNote}</p>
         </>
       ) : (
         <>
@@ -117,7 +118,7 @@ export function ConnectGitHub({ deviceFlow }: { deviceFlow: boolean }) {
         </>
       )}
 
-      <div className={`${deviceFlow ? "mt-auto border-t border-line pt-4" : ""}`}>
+      <div className={deviceFlow ? "border-t border-line pt-5" : ""}>
         {tokenOpen ? (
           <TokenForm withTitle={deviceFlow} />
         ) : (

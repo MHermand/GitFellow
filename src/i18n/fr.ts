@@ -193,12 +193,12 @@ export const fr: Messages = {
     steps: { github: "Connecter GitHub", repos: "Choisir les dépôts", sync: "Première synchronisation" },
     stepsShort: { github: "Connecter GitHub", repos: "Dépôts", sync: "Synchro" },
     promise: "Le temps de votre équipe, lu dans ses commits.",
+    tagline: "Le temps de travail estimé à partir des commits, par personne et par semaine — sur cet ordinateur, sans compte ni serveur.",
     guarantees: {
       local: "Tout reste sur cet ordinateur : ni compte, ni serveur.",
       readOnly: "Lecture seule : GitFellow n'écrit jamais dans vos dépôts.",
       revocable: "Révocable à tout moment depuis vos réglages GitHub.",
     },
-    peek: { people: ["Alice", "Bob", "Chloé"], repos: ["web-app", "api", "mobile"] },
     github: {
       intro: "GitFellow lit les commits de vos dépôts avec votre compte GitHub. Rien ne quitte cette machine, hormis les appels à GitHub.",
       connectTitle: "Connectez votre compte",

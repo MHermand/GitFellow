@@ -197,12 +197,12 @@ export const en = {
     steps: { github: "Connect GitHub", repos: "Choose repositories", sync: "First sync" },
     stepsShort: { github: "Connect GitHub", repos: "Repositories", sync: "Sync" },
     promise: "Your team's time, read from its commits.",
+    tagline: "Work time estimated from commits, per person and per week — on this computer, with no account and no server.",
     guarantees: {
       local: "Everything stays on this computer: no account, no server.",
       readOnly: "Read-only: GitFellow never writes to your repositories.",
       revocable: "Revocable at any time from your GitHub settings.",
     },
-    peek: { people: ["Alice", "Bob", "Chloé"], repos: ["web-app", "api", "mobile"] },
     github: {
       intro: "GitFellow reads the commits of your repositories with your GitHub account. Nothing leaves this machine except the calls to GitHub.",
       connectTitle: "Connect your account",
