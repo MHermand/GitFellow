@@ -198,7 +198,7 @@ export const fr: Messages = {
     guarantees: {
       local: "Tout reste sur cet ordinateur.",
       readOnly: "GitFellow n'écrit jamais dans vos dépôts.",
-      revocable: "Révocable à tout moment depuis vos réglages GitHub.",
+      revocable: "Révocable à tout moment dans GitHub.",
     },
     github: {
       intro: "GitFellow lit les commits de vos dépôts avec votre compte GitHub. Rien ne quitte cette machine, hormis les appels à GitHub.",

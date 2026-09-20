@@ -7,6 +7,13 @@ import { useI18n } from "@/i18n/client";
 import type { GhRepo } from "@/lib/github";
 
 /** Étape 2 : cocher les dépôts à suivre, et la date à partir de laquelle on lit. */
+/** Hauteurs mesurées au navigateur : une ligne de dépôt, un en-tête d'organisation. */
+const ROW_PX = 37;
+const HEADER_PX = 30;
+/** Cinq dépôts visibles sous le premier en-tête ; au-delà, la liste défile. */
+const VISIBLE_ROWS = 5;
+const LIST_MAX_PX = HEADER_PX + VISIBLE_ROWS * ROW_PX;
+
 export function ChooseRepos({ repos, tracked, defaultSince, loadError }: { repos: GhRepo[]; tracked: string[]; defaultSince: string; loadError: string | null }) {
   const { m } = useI18n();
   const r = m.setup.repos;
@@ -47,8 +54,9 @@ export function ChooseRepos({ repos, tracked, defaultSince, loadError }: { repos
         className={`${inputBase} h-10 w-full px-3`}
       />
 
-      {/* Pas de défilement propre : c'est la colonne qui défile, et les en-têtes d'organisation s'y collent. */}
-      <div className="rounded-xl border border-line">
+      {/* Cinq dépôts visibles, le reste au défilement : la liste ne pousse pas le bouton hors de l'écran.
+          ROW_PX est la hauteur réelle d'une ligne, mesurée au navigateur. */}
+      <div className="overflow-y-auto rounded-xl border border-line" style={{ maxHeight: LIST_MAX_PX }}>
         {groups.length === 0 ? <p className="p-4 text-sm text-ink-2">{r.empty}</p> : null}
         {groups.map(([owner, list]) => (
           <div key={owner}>

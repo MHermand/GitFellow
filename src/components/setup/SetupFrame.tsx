@@ -46,8 +46,10 @@ export function SetupFrame({ step, children }: { step: SetupStep; children: Reac
       </aside>
 
       {/* Le panneau reste en place d'une étape à l'autre ; c'est cette colonne seule qui défile. */}
-      <section className="flex flex-1 items-center justify-center px-6 py-10 md:min-h-0 md:overflow-y-auto md:px-12 md:py-14">
-        <div className="flex w-full max-w-[400px] flex-col gap-6">
+      <section className="flex flex-1 justify-center px-6 py-10 md:min-h-0 md:overflow-y-auto md:px-12 md:py-14">
+        {/* Le bandeau d'étapes est calé en haut — même hauteur d'une étape à l'autre — et le
+            contenu se centre dans ce qui reste, tant qu'il y tient. */}
+        <div className="flex w-full max-w-[400px] flex-col">
           <ol className="flex flex-wrap items-center gap-2 text-xs font-medium" aria-label={m.setup.title}>
             {STEPS.map((s, i) => {
               const done = i < index;
@@ -68,7 +70,7 @@ export function SetupFrame({ step, children }: { step: SetupStep; children: Reac
               );
             })}
           </ol>
-          {children}
+          <div className="my-auto flex flex-col gap-6 pt-6">{children}</div>
         </div>
       </section>
     </main>

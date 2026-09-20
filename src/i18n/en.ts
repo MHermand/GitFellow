@@ -202,7 +202,7 @@ export const en = {
     guarantees: {
       local: "Everything stays on this computer.",
       readOnly: "GitFellow never writes to your repositories.",
-      revocable: "Revocable at any time from your GitHub settings.",
+      revocable: "Revocable at any time in GitHub.",
     },
     github: {
       intro: "GitFellow reads the commits of your repositories with your GitHub account. Nothing leaves this machine except the calls to GitHub.",
