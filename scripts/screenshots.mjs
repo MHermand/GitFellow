@@ -24,6 +24,10 @@ try {
 }
 
 const PORT = 4760;
+/** Fenêtre des captures : la hauteur normale, et celle des pages qui défilent dans leur cadre. */
+const WIDE = 1440;
+const NORMAL = 900;
+const TALL = 1380;
 const BASE = `http://127.0.0.1:${PORT}`;
 const OUT = join(process.cwd(), "docs");
 const home = mkdtempSync(join(tmpdir(), "gitfellow-shots-"));
@@ -56,7 +60,7 @@ try {
   await ready();
   const browser = await chromium.launch({ executablePath });
   for (const [lang, accept] of [["en", "en-US,en;q=0.9"], ["fr", "fr-FR,fr;q=0.9"]]) {
-    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, extraHTTPHeaders: { "Accept-Language": accept } });
+    const context = await browser.newContext({ viewport: { width: WIDE, height: NORMAL }, extraHTTPHeaders: { "Accept-Language": accept } });
     const page = await context.newPage();
     if (lang === "en") {
       // L'assistant, une seule fois : la connexion vaut pour les deux langues.
@@ -90,13 +94,14 @@ try {
     await shoot(page, `activity-day-${lang}`);
     await page.goto(`${BASE}/`);
     const detail = await page.locator('a[href^="/contributors/"]').first().getAttribute("href");
+    // Ces deux pages défilent dans leur cadre, pas dans la fenêtre : une fenêtre haute montre tout.
+    // Elles se font face dans le README, donc elles se prennent à la même hauteur.
+    await page.setViewportSize({ width: WIDE, height: TALL });
     await page.goto(`${BASE}${detail}`);
     await shoot(page, `contributor-${lang}`);
-    // La page défile dans son cadre, pas dans la fenêtre : une fenêtre haute montre tout.
-    await page.setViewportSize({ width: 1440, height: 1380 });
     await page.goto(`${BASE}/settings`);
     await shoot(page, `settings-${lang}`);
-    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.setViewportSize({ width: WIDE, height: NORMAL });
     await context.close();
   }
   await browser.close();
