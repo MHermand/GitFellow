@@ -120,10 +120,15 @@ export function ConnectGitHub({ deviceFlow }: { deviceFlow: boolean }) {
       )}
 
       <div className={deviceFlow ? "border-t border-line pt-5" : ""}>
+        {/* Souligné en permanence : c'est la seule autre voie, elle doit se voir sans survol. */}
         {tokenOpen ? (
           <TokenForm withTitle={deviceFlow} />
         ) : (
-          <button type="button" onClick={() => setTokenOpen(true)} className="text-sm text-ink-2 underline-offset-[3px] hover:text-ink hover:underline">
+          <button
+            type="button"
+            onClick={() => setTokenOpen(true)}
+            className="text-sm text-ink-2 underline underline-offset-[3px] transition-colors hover:text-accent"
+          >
             {g.useToken}
           </button>
         )}

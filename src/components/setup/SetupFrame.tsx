@@ -27,7 +27,7 @@ export function SetupFrame({ step, children }: { step: SetupStep; children: Reac
         />
         <div className="relative flex flex-col gap-5">
           <img src="/gitfellow-logo.svg" alt="" width={56} height={56} style={{ width: 56, height: 56 }} />
-          <h1 className="text-[26px] leading-[1.15] font-bold tracking-[-0.03em] md:text-3xl">
+          <h1 className="text-justify text-[26px] leading-[1.15] font-bold tracking-[-0.03em] md:text-3xl">
             {m.setup.headline} <span className="text-accent-dark">{m.setup.headlineBrand}</span>
           </h1>
           {/* Un peu d'air sous le titre : la phrase se lit comme une suite, pas comme un sous-titre collé. */}
