@@ -50,6 +50,7 @@ export function FirstSync() {
 
   return (
     <div className="flex flex-col gap-5">
+      <h2 className="text-xl font-bold tracking-tight">{m.setup.steps.sync}</h2>
       <div className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between gap-3">
           <span className="text-sm font-medium">{done ? t(s.done, { commits, repos: total - failed }) : s.title}</span>

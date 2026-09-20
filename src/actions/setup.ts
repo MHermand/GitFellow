@@ -8,6 +8,7 @@ import { parseDay } from "@/lib/calendar";
 import { forgetConnection, saveConnection } from "@/lib/connect";
 import { describeError, pollDeviceToken, requestDeviceCode, type DeviceCode, type DevicePoll } from "@/lib/github";
 import { githubClientId } from "@/lib/github-app";
+import { isFakeGitHub } from "@/lib/github-client";
 import { autoTrackAuthors } from "@/lib/onboarding";
 import { forgetRepos } from "@/lib/repos-catalog";
 import { getStore } from "@/lib/runtime";
@@ -28,6 +29,9 @@ export async function beginDeviceFlow(): Promise<DeviceCode | { error: string }>
   const { m } = await getI18n();
   const clientId = githubClientId();
   if (!clientId) return { error: m.setup.github.noClientId };
+  if (isFakeGitHub()) {
+    return { deviceCode: "fake", userCode: "ABCD-1234", verificationUri: "https://github.com/login/device", expiresIn: 900, interval: 5 };
+  }
   try {
     return await requestDeviceCode(clientId);
   } catch (err) {
@@ -40,6 +44,7 @@ export async function pollDeviceFlow(deviceCode: string): Promise<DevicePoll> {
   const { m } = await getI18n();
   const clientId = githubClientId();
   if (!clientId || !deviceCode || deviceCode.length > 200) return { status: "error", message: m.setup.github.noClientId };
+  if (isFakeGitHub()) return { status: "pending" };
   let result: DevicePoll;
   try {
     result = await pollDeviceToken(clientId, deviceCode);

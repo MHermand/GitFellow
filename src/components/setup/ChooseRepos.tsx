@@ -33,7 +33,10 @@ export function ChooseRepos({ repos, tracked, defaultSince, loadError }: { repos
 
   return (
     <form action={action} className="flex flex-col gap-4">
-      <p className="text-sm text-ink-2">{r.intro}</p>
+      <div>
+        <h2 className="text-xl font-bold tracking-tight">{m.setup.steps.repos}</h2>
+        <p className="mt-1.5 text-sm text-ink-2">{r.intro}</p>
+      </div>
       {loadError ? <Notice kind="error">{loadError}</Notice> : null}
 
       <input
