@@ -237,7 +237,6 @@ export const en = {
       search: "Filter…",
       trackedSince: "Tracking start",
       trackedSinceHint: "Commits before this date are ignored. Empty: the whole history — slower on large repositories.",
-      selected: { one: "{n} selected", other: "{n} selected" },
       submit: "Start tracking",
       empty: "No repository found for this account.",
       private: "private",

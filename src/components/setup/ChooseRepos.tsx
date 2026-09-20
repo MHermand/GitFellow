@@ -8,7 +8,7 @@ import type { GhRepo } from "@/lib/github";
 
 /** Étape 2 : cocher les dépôts à suivre, et la date à partir de laquelle on lit. */
 export function ChooseRepos({ repos, tracked, defaultSince, loadError }: { repos: GhRepo[]; tracked: string[]; defaultSince: string; loadError: string | null }) {
-  const { m, n } = useI18n();
+  const { m } = useI18n();
   const r = m.setup.repos;
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(() => new Set(tracked));
@@ -47,7 +47,8 @@ export function ChooseRepos({ repos, tracked, defaultSince, loadError }: { repos
         className={`${inputBase} h-10 w-full px-3`}
       />
 
-      <div className="max-h-[50vh] overflow-y-auto rounded-xl border border-line">
+      {/* Pas de défilement propre : c'est la colonne qui défile, et les en-têtes d'organisation s'y collent. */}
+      <div className="rounded-xl border border-line">
         {groups.length === 0 ? <p className="p-4 text-sm text-ink-2">{r.empty}</p> : null}
         {groups.map(([owner, list]) => (
           <div key={owner}>
@@ -83,20 +84,18 @@ export function ChooseRepos({ repos, tracked, defaultSince, loadError }: { repos
         ))}
       </div>
 
-      <div className="flex flex-wrap items-end justify-between gap-4 border-t border-line pt-4">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="tracked_since" className="text-xs font-medium text-ink-2">
-            {r.trackedSince}
-          </label>
-          <input id="tracked_since" name="tracked_since" type="date" defaultValue={defaultSince} className={`${inputBase} h-10 w-[180px] px-3`} />
-          <span className="max-w-sm text-xs text-ink-2">{r.trackedSinceHint}</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="tnum text-sm text-ink-2">{n(r.selected, selected.size)}</span>
-          <button type="submit" disabled={pending || selected.size === 0} className={btnPrimary}>
+      {/* La date et le bouton se partagent la largeur du champ de filtre, juste au-dessus. */}
+      <div className="flex flex-col gap-1 border-t border-line pt-4">
+        <label htmlFor="tracked_since" className="text-xs font-medium text-ink-2">
+          {r.trackedSince}
+        </label>
+        <div className="flex items-center gap-2">
+          <input id="tracked_since" name="tracked_since" type="date" defaultValue={defaultSince} className={`${inputBase} h-10 w-[172px] shrink-0 px-3`} />
+          <button type="submit" disabled={pending || selected.size === 0} className={`${btnPrimary} min-w-0 flex-1`}>
             {r.submit}
           </button>
         </div>
+        <span className="text-xs text-ink-2">{r.trackedSinceHint}</span>
       </div>
       {state.error ? <Notice kind="error">{state.error}</Notice> : null}
     </form>

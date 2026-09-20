@@ -17,7 +17,7 @@ export function SetupFrame({ step, children }: { step: SetupStep; children: Reac
 
   return (
     // Le panneau garde une largeur de lecture : il ne s'étire pas avec l'écran.
-    <main className="flex min-h-screen flex-col md:grid md:grid-cols-[minmax(18rem,30rem)_1fr]">
+    <main className="flex min-h-screen flex-col md:grid md:h-screen md:min-h-0 md:grid-cols-[minmax(18rem,30rem)_1fr] md:overflow-hidden">
       <aside className="relative flex flex-col justify-between gap-10 overflow-hidden bg-ink px-8 py-10 text-white md:px-12 md:py-14">
         {/* Trame discrète : le fond sombre respire sans rien raconter. */}
         <div
@@ -45,7 +45,8 @@ export function SetupFrame({ step, children }: { step: SetupStep; children: Reac
         </ul>
       </aside>
 
-      <section className="flex flex-1 items-center justify-center px-6 py-10 md:px-12 md:py-14">
+      {/* Le panneau reste en place d'une étape à l'autre ; c'est cette colonne seule qui défile. */}
+      <section className="flex flex-1 items-center justify-center px-6 py-10 md:min-h-0 md:overflow-y-auto md:px-12 md:py-14">
         <div className="flex w-full max-w-[400px] flex-col gap-6">
           <ol className="flex flex-wrap items-center gap-2 text-xs font-medium" aria-label={m.setup.title}>
             {STEPS.map((s, i) => {

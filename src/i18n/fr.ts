@@ -233,7 +233,6 @@ export const fr: Messages = {
       search: "Filtrer…",
       trackedSince: "Début du suivi",
       trackedSinceHint: "Les commits antérieurs sont ignorés. Vide : tout l'historique — plus long sur les gros dépôts.",
-      selected: { one: "{n} sélectionné", other: "{n} sélectionnés" },
       submit: "Commencer le suivi",
       empty: "Aucun dépôt trouvé pour ce compte.",
       private: "privé",
