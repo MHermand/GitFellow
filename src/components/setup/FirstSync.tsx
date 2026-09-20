@@ -54,12 +54,12 @@ export function FirstSync() {
       <div className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between gap-3">
           <span className="text-sm font-medium">{done ? t(s.done, { commits, repos: total - failed }) : s.title}</span>
-          {total > 0 ? <span className="tnum text-xs text-muted">{t(s.progress, { done: doneCount, total })}</span> : null}
+          {total > 0 ? <span className="tnum text-xs text-ink-2">{t(s.progress, { done: doneCount, total })}</span> : null}
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(ratio * 100)}>
           <div className="h-full rounded-full bg-data transition-[width] duration-500" style={{ width: `${Math.max(2, ratio * 100)}%` }} />
         </div>
-        {progress?.current ? <span className="text-xs text-muted">{t(s.current, { repo: progress.current })}</span> : null}
+        {progress?.current ? <span className="text-xs text-ink-2">{t(s.current, { repo: progress.current })}</span> : null}
       </div>
 
       {progress?.error ? <Notice kind="error">{progress.error}</Notice> : null}

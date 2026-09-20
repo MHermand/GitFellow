@@ -48,10 +48,10 @@ export function ChooseRepos({ repos, tracked, defaultSince, loadError }: { repos
       />
 
       <div className="max-h-[50vh] overflow-y-auto rounded-xl border border-line">
-        {groups.length === 0 ? <p className="p-4 text-sm text-muted">{r.empty}</p> : null}
+        {groups.length === 0 ? <p className="p-4 text-sm text-ink-2">{r.empty}</p> : null}
         {groups.map(([owner, list]) => (
           <div key={owner}>
-            <div className="sticky top-0 border-b border-line bg-bg px-3 py-1.5 text-[11px] font-semibold tracking-wide text-muted uppercase">
+            <div className="sticky top-0 border-b border-line bg-bg px-3 py-1.5 text-[11px] font-semibold tracking-wide text-ink-2 uppercase">
               {owner}
             </div>
             <ul>
@@ -70,7 +70,7 @@ export function ChooseRepos({ repos, tracked, defaultSince, loadError }: { repos
                       />
                       <span className="min-w-0 flex-1 truncate">
                         <span className={checked ? "font-medium text-ink" : "text-ink"}>{repo.name}</span>
-                        {repo.description ? <span className="ml-2 text-xs text-muted">{repo.description}</span> : null}
+                        {repo.description ? <span className="ml-2 text-xs text-ink-2">{repo.description}</span> : null}
                       </span>
                       {repo.private ? <Badge>{r.private}</Badge> : null}
                       {repo.archived ? <Badge>{r.archived}</Badge> : null}
@@ -89,7 +89,7 @@ export function ChooseRepos({ repos, tracked, defaultSince, loadError }: { repos
             {r.trackedSince}
           </label>
           <input id="tracked_since" name="tracked_since" type="date" defaultValue={defaultSince} className={`${inputBase} h-10 w-[180px] px-3`} />
-          <span className="max-w-sm text-xs text-muted">{r.trackedSinceHint}</span>
+          <span className="max-w-sm text-xs text-ink-2">{r.trackedSinceHint}</span>
         </div>
         <div className="flex items-center gap-3">
           <span className="tnum text-sm text-ink-2">{n(r.selected, selected.size)}</span>

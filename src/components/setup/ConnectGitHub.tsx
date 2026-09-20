@@ -110,7 +110,7 @@ export function ConnectGitHub({ deviceFlow }: { deviceFlow: boolean }) {
             {phase.error ? g.retry : g.device}
           </button>
           {/* Justifiée sur la largeur du bouton : le bloc de texte a le même aplomb que lui. */}
-          <p className="w-full text-justify text-xs leading-relaxed text-muted">{g.codeNote}</p>
+          <p className="w-full text-justify text-xs leading-relaxed text-ink-2">{g.codeNote}</p>
         </>
       ) : (
         <>
@@ -189,7 +189,7 @@ function TokenForm({ withTitle }: { withTitle: boolean }) {
           {g.tokenButton}
         </button>
       </div>
-      <p className="text-xs leading-relaxed text-muted">{g.tokenHelp}</p>
+      <p className="text-xs leading-relaxed text-ink-2">{g.tokenHelp}</p>
       {state.error ? <Notice kind="error">{state.error}</Notice> : null}
     </form>
   );
