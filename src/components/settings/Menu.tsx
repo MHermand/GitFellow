@@ -51,7 +51,7 @@ export function Menu({
         className={`inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm transition-colors ${
           width ? `${width} justify-between` : ""
         } ${
-          open ? "border-[#c7d2fe] bg-accent-soft text-accent-fg" : "border-line bg-surface text-muted hover:border-line-strong hover:text-ink-2"
+          open ? "border-[#b4d6fd] bg-accent-soft text-accent-fg" : "border-line bg-surface text-muted hover:border-line-strong hover:text-ink-2"
         }`}
       >
         {label}

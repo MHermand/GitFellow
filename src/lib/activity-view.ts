@@ -220,7 +220,7 @@ export function buildActivityView(input: ActivityViewInput): ActivityView {
   const periodSessions = new Map(selected.map((r) => [r.contributor.id, inRange(r.sessions, period.start, period.end)]));
   // Teinte de la page : celle de la personne quand elle est seule à l'écran — sélectionnée et
   // présente sur la période —, la teinte de données sinon. Jauges, répartitions, rythme,
-  // tendance et repères du calendrier en découlent ; l'indigo reste à l'interface.
+  // tendance et repères du calendrier en découlent ; le bleu de marque reste à l'interface.
   const onScreen = selected.filter((r) => (periodSessions.get(r.contributor.id) ?? []).length > 0);
   const hue = onScreen.length === 1 ? personSwatch(onScreen[0].contributor.id).dot : DATA_HUE;
   const periodDays = new Set(period.days);

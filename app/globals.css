@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Thème « Hub Colibrimo » : mêmes valeurs que les tokens shadcn du hub, résolues en hex. */
+/* Gris et rayons repris du hub (tokens shadcn résolus en hex) ; l'accent est la couleur GitFellow. */
 :root {
   color-scheme: light;
   --bg: #f8fafc; /* background · hsl(210 40% 98%) */
@@ -10,13 +10,14 @@
   --muted: #94a3b8; /* texte tertiaire */
   --line: #e2e8f0; /* border · hsl(214.3 31.8% 91.4%) */
   --line-strong: #cbd5e1;
-  --accent: #4f46e5; /* primary · hsl(243.4 75.4% 58.6%) */
-  --accent-fg: #463acb; /* accent-foreground · hsl(245 58% 51%) */
-  --accent-soft: #eef2ff; /* accent · hsl(226 100% 96.7%) */
-  --accent-dark: #818cf8; /* le violet sur fond d'encre : 4f46e5 n'y tient pas (2,8 : 1) */
+  --accent: #2a79d7; /* couleur identitaire · hsl(212.6 68.4% 50.4%) */
+  --accent-fg: #1d569b; /* le bleu en texte : 7,0 : 1 sur le fond, là où l'accent ne fait que 4,2 */
+  --accent-soft: #eef6ff; /* aplat très clair de la même teinte */
+  --accent-dark: #5c98e0; /* le bleu sur fond d'encre : l'accent n'y tient pas (4,1 : 1) */
   --track: #f1f5f9; /* muted · hsl(210 40% 96.1%) */
   --danger: #e11d48; /* destructive · hsl(346.8 77.2% 49.8%) */
-  --data: #2a78d6; /* teinte des données, première place du jeu catégoriel */
+  --data: #2a78d6; /* teinte des données, première place du jeu catégoriel (SWATCHES[0]) —
+     voisine de l'accent depuis que la marque est bleue : c'est voulu, pas un doublon à fusionner */
 }
 
 @theme inline {

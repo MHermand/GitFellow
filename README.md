@@ -45,7 +45,7 @@ npx gitfellow --data-dir DIR   # another data folder
 - **Activity report** in Day, Week or Month view, one colour per person, each session at its real hour. The right column stacks the period's total with its gauge, the split by repository, the day × hour rhythm and the trend; hovering any of them gives the figures.
 - **Filters** by people and by repositories, kept across views and pages.
 - **Targets** — optional, per person: hours per day, per week or per month. Whatever the unit, the target is brought back to hours per working day and compared with the period.
-- **Colours follow the data** — the interface stays indigo; the report takes one hue per page: a person's colour when they are alone on screen, the data blue otherwise.
+- **Colours follow the data** — the interface keeps the GitFellow blue; the report takes one hue per page: a person's colour when they are alone on screen, the data blue otherwise.
 - **CSV export** of a person's sessions: `/api/export?contributor=<id>&week=2026-W38` (or `from`/`to` dates).
 - **Two languages** — French and English, after your browser, or fixed in Settings.
 

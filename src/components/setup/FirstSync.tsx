@@ -57,7 +57,7 @@ export function FirstSync() {
           {total > 0 ? <span className="tnum text-xs text-ink-2">{t(s.progress, { done: doneCount, total })}</span> : null}
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(ratio * 100)}>
-          <div className="h-full rounded-full bg-data transition-[width] duration-500" style={{ width: `${Math.max(2, ratio * 100)}%` }} />
+          <div className="h-full rounded-full bg-accent transition-[width] duration-500" style={{ width: `${Math.max(2, ratio * 100)}%` }} />
         </div>
         {progress?.current ? <span className="text-xs text-ink-2">{t(s.current, { repo: progress.current })}</span> : null}
       </div>

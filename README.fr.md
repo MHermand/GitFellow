@@ -45,7 +45,7 @@ npx gitfellow --data-dir DIR   # un autre dossier de données
 - **Rapport d'activité** en vue Jour, Semaine ou Mois, une couleur par personne, chaque session à son heure réelle. La colonne de droite empile le cumul de la période avec sa jauge, la répartition par dépôt, le rythme jour × heure et la tendance ; le survol donne les chiffres.
 - **Filtres** par personnes et par dépôts, conservés d'une vue et d'une page à l'autre.
 - **Objectifs** — facultatifs, par personne : des heures par jour, par semaine ou par mois. Quelle que soit l'unité, l'objectif est ramené à des heures par jour ouvré et comparé à la période.
-- **Les couleurs suivent les données** — l'interface reste indigo ; le rapport prend une teinte par page : celle de la personne quand elle est seule à l'écran, le bleu de données sinon.
+- **Les couleurs suivent les données** — l'interface garde le bleu GitFellow ; le rapport prend une teinte par page : celle de la personne quand elle est seule à l'écran, le bleu de données sinon.
 - **Export CSV** des sessions d'une personne : `/api/export?contributor=<id>&week=2026-W38` (ou des dates `from`/`to`).
 - **Deux langues** — français et anglais, selon le navigateur, ou fixée dans les Paramètres.
 

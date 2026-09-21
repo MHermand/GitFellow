@@ -47,7 +47,7 @@ function IconMenu({
   }, [open]);
 
   const toneClass = open
-    ? "border-[#c7d2fe] bg-accent-soft text-accent-fg"
+    ? "border-[#b4d6fd] bg-accent-soft text-accent-fg"
     : "border-line bg-surface text-ink-2 hover:bg-accent-soft hover:text-accent-fg";
 
   return (
